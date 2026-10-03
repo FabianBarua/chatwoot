@@ -1,0 +1,68 @@
+# Imagen Docker de Chatwoot Xplus.
+# Cada push a una rama *-xp compila la imagen y la publica en GHCR.
+# El deploy NO es automático: después se hace "Deploy" a mano en Dokploy,
+# que baja la imagen nueva (pull_policy: always) y reinicia Chatwoot.
+name: Imagen Xplus
+
+on:
+  push:
+    branches:
+      - '*-xp'
+  workflow_dispatch:
+
+concurrency:
+  group: xp-image-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # La rama se llama como la versión (v4.18.0-xp), así que el tag de la
+      # imagen es el mismo; además se publica uno con el commit para poder
+      # volver atrás a una compilación exacta.
+      - name: Tags de la imagen
+        run: |
+          IMAGE="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/chatwoot"
+          REF="$(echo '${{ github.ref_name }}' | sed 's#/#-#g')"
+          SHORT_SHA="$(echo '${{ github.sha }}' | cut -c1-7)"
+          echo "TAGS=${IMAGE}:${REF},${IMAGE}:${REF}-${SHORT_SHA}" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login a GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compilar y publicar
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.TAGS }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resumen
+        run: |
+          echo "### Imagen publicada" >> "$GITHUB_STEP_SUMMARY"
+          echo "${TAGS}" | tr ',' '\n' | sed 's/^/- `/; s/$/`/' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Siguiente paso: Dokploy → chatwoot → Deploy." >> "$GITHUB_STEP_SUMMARY"
