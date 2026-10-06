@@ -1,0 +1,64 @@
+# Stack local para probar la imagen Xplus tal como corre en producción.
+#   docker compose -f docker/xplus/docker-compose.local.yaml up -d
+# Panel en http://localhost:8090 (ver docs/xplus/DESARROLLO.md para el primer arranque).
+name: xp-local
+
+x-app: &app
+  image: chatwoot:xp-local
+  environment:
+    RAILS_ENV: production
+    NODE_ENV: production
+    INSTALLATION_ENV: docker
+    # Solo para uso local: no es el valor de producción
+    SECRET_KEY_BASE: localxpsecretkeybase0123456789abcdef0123456789abcdef
+    FRONTEND_URL: http://localhost:8090
+    DEFAULT_LOCALE: es
+    FORCE_SSL: "false"
+    ENABLE_ACCOUNT_SIGNUP: "false"
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: "5432"
+    POSTGRES_USERNAME: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DATABASE: chatwoot
+    REDIS_URL: redis://redis:6379
+    RAILS_LOG_TO_STDOUT: "true"
+    LOG_LEVEL: info
+    ACTIVE_STORAGE_SERVICE: local
+    RAILS_SERVE_STATIC_FILES: "true"
+    ENABLE_PUSH_RELAY_SERVER: "false"
+  volumes:
+    - storage:/app/storage
+  depends_on:
+    - postgres
+    - redis
+
+services:
+  rails:
+    <<: *app
+    # En Windows el puerto 3000 suele estar reservado por Hyper-V
+    ports:
+      - "8090:3000"
+    command: ["sh", "-c", "bundle exec rails db:chatwoot_prepare && bundle exec rails s -p 3000 -b 0.0.0.0"]
+
+  sidekiq:
+    <<: *app
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: chatwoot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - rd:/data
+
+volumes:
+  storage:
+  pg:
+  rd:
