@@ -9,11 +9,15 @@ describe('#mutations', () => {
         mine_count: 1,
         unassigned_count: 1,
         all_count: 2,
+        unattended_count: 1,
+        transferred_count: 0,
       });
       expect(state).toEqual({
         mineCount: 1,
         unAssignedCount: 1,
         allCount: 2,
+        unattendedCount: 1,
+        transferredCount: 0,
         updatedOn: expect.any(Date),
       });
     });

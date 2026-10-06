@@ -50,11 +50,14 @@ const voiceCallData = computed(() => {
   };
 });
 
+const isTransferred = computed(() => !!props.chat.transferred_at);
+
 const showMetaSection = computed(() => {
   return (
     props.showInboxName ||
     (props.showAssignee && props.assignee.name) ||
-    props.chat.priority
+    props.chat.priority ||
+    isTransferred.value
   );
 });
 
@@ -171,6 +174,17 @@ watch(
               class="size-3 text-n-slate-11 flex-shrink-0"
             />
             <span class="truncate">{{ assignee.name }}</span>
+          </span>
+          <span
+            v-if="isTransferred"
+            v-tooltip.top="$t('CHAT_LIST.TRANSFERRED_TOOLTIP')"
+            class="text-n-amber-11 bg-n-amber-3 text-xs font-medium leading-3 py-0.5 px-1 rounded-sm inline-flex items-center gap-px flex-shrink-0"
+          >
+            <Icon
+              icon="i-lucide-arrow-right-left"
+              class="size-3 flex-shrink-0"
+            />
+            {{ $t('CHAT_LIST.TRANSFERRED_BADGE') }}
           </span>
           <CardPriorityIcon
             :priority="chat.priority"

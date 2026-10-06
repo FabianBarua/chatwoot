@@ -342,6 +342,14 @@ class Message < ApplicationRecord
     set_waiting_since_on_incoming_message
   end
 
+  # The transfer flag is cleared once the agent who received the conversation replies.
+  def clear_transfer_on_assignee_reply
+    return if private || conversation.transferred_at.blank?
+    return unless human_response? && sender_id == conversation.assignee_id
+
+    conversation.update(transferred_at: nil)
+  end
+
   def clear_waiting_since_on_outgoing_response
     if human_response?
       Rails.configuration.dispatcher.dispatch(
@@ -385,6 +393,7 @@ class Message < ApplicationRecord
     else
       update_waiting_since
     end
+    clear_transfer_on_assignee_reply
   end
 
   def dispatch_update_event

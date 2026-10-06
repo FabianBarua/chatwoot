@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_05_000002) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -121,6 +121,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "account_id"
+  end
+
+  create_table "agent_availability_logs", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "user_id", null: false
+    t.string "availability", null: false
+    t.datetime "created_at", null: false
+    t.index ["account_id", "created_at"], name: "index_agent_availability_logs_on_account_id_and_created_at"
+    t.index ["account_id", "user_id", "created_at"], name: "index_agent_availability_logs_on_account_user_created"
   end
 
   create_table "agent_bots", force: :cascade do |t|
@@ -884,6 +893,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
     t.integer "priority"
     t.bigint "sla_policy_id"
     t.datetime "waiting_since"
+    t.datetime "transferred_at"
     t.text "cached_label_list"
     t.bigint "assignee_agent_bot_id"
     t.string "ai_assignee_type"
@@ -906,6 +916,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_31_000000) do
     t.index ["status", "priority"], name: "index_conversations_on_status_and_priority"
     t.index ["team_id"], name: "index_conversations_on_team_id"
     t.index ["uuid"], name: "index_conversations_on_uuid", unique: true
+    t.index ["account_id", "transferred_at"], name: "index_conversations_on_account_id_and_transferred_at", where: "(transferred_at IS NOT NULL)"
     t.index ["waiting_since"], name: "index_conversations_on_waiting_since"
   end
 

@@ -23,35 +23,21 @@ class ConversationFinder
   def perform
     set_up
 
-    mine_count, unassigned_count, all_count = set_count_for_all_conversations
-    assigned_count = all_count - unassigned_count
+    counts = conversation_counts
 
     filter_by_assignee_type
 
     {
       conversations: conversations,
-      count: {
-        mine_count: mine_count,
-        assigned_count: assigned_count,
-        unassigned_count: unassigned_count,
-        all_count: all_count
-      }
+      count: counts
     }
   end
 
   def perform_meta_only
     set_up
 
-    mine_count, unassigned_count, all_count, = set_count_for_all_conversations
-    assigned_count = all_count - unassigned_count
-
     {
-      count: {
-        mine_count: mine_count,
-        assigned_count: assigned_count,
-        unassigned_count: unassigned_count,
-        all_count: all_count
-      }
+      count: conversation_counts
     }
   end
 
@@ -114,6 +100,10 @@ class ConversationFinder
       @conversations = @conversations.unassigned
     when 'assigned'
       @conversations = @conversations.assigned
+    when 'unattended'
+      @conversations = @conversations.unattended
+    when 'transferred'
+      @conversations = @conversations.transferred
     end
     @conversations
   end
@@ -167,22 +157,39 @@ class ConversationFinder
     @conversations = @conversations.where(contact_inboxes: { source_id: params[:source_id] })
   end
 
+  def conversation_counts
+    mine_count, unassigned_count, all_count, unattended_count, transferred_count = set_count_for_all_conversations
+
+    {
+      mine_count: mine_count,
+      assigned_count: all_count - unassigned_count,
+      unassigned_count: unassigned_count,
+      all_count: all_count,
+      unattended_count: unattended_count,
+      transferred_count: transferred_count
+    }
+  end
+
   def set_count_for_all_conversations
     return legacy_count_for_all_conversations if @conversations.limit_value || @conversations.offset_value || @conversations.eager_loading?
 
     counts = @conversations.unscope(:order).pick(
       Arel.sql("COUNT(*) FILTER (WHERE assignee_id = #{current_user.id})"),
       Arel.sql('COUNT(*) FILTER (WHERE assignee_id IS NULL AND assignee_agent_bot_id IS NULL)'),
-      Arel.sql('COUNT(*)')
+      Arel.sql('COUNT(*)'),
+      Arel.sql('COUNT(*) FILTER (WHERE first_reply_created_at IS NULL OR waiting_since IS NOT NULL)'),
+      Arel.sql('COUNT(*) FILTER (WHERE transferred_at IS NOT NULL)')
     )
-    counts || [0, 0, 0]
+    counts || [0, 0, 0, 0, 0]
   end
 
   def legacy_count_for_all_conversations
     [
       @conversations.assigned_to(current_user).count,
       @conversations.unassigned.count,
-      @conversations.count
+      @conversations.count,
+      @conversations.unattended.count,
+      @conversations.transferred.count
     ]
   end
 

@@ -179,7 +179,9 @@ describe ConversationFinder do
                                        mine_count: 2,
                                        assigned_count: 4,
                                        unassigned_count: 1,
-                                       all_count: 5
+                                       all_count: 5,
+                                       unattended_count: 5,
+                                       transferred_count: 0
                                      })
       end
     end
@@ -274,7 +276,9 @@ describe ConversationFinder do
                                        mine_count: 2,
                                        assigned_count: 3,
                                        unassigned_count: 1,
-                                       all_count: 4
+                                       all_count: 4,
+                                       unattended_count: 4,
+                                       transferred_count: 0
                                      })
       end
 

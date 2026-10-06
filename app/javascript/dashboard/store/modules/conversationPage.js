@@ -4,12 +4,16 @@ const state = {
   currentPage: {
     me: 0,
     unassigned: 0,
+    unattended: 0,
+    transferred: 0,
     all: 0,
     appliedFilters: 0,
   },
   hasEndReached: {
     me: false,
     unassigned: false,
+    unattended: false,
+    transferred: false,
     all: false,
   },
 };
@@ -46,11 +50,14 @@ export const mutations = {
     };
   },
   [types.default.SET_CONVERSATION_END_REACHED]: ($state, { filter }) => {
+    // Every other tab is a subset of "all", so they are fully loaded too
     if (filter === 'all') {
       $state.hasEndReached = {
         ...$state.hasEndReached,
         unassigned: true,
         me: true,
+        unattended: true,
+        transferred: true,
       };
     }
     $state.hasEndReached = {
@@ -62,6 +69,8 @@ export const mutations = {
     $state.currentPage = {
       me: 0,
       unassigned: 0,
+      unattended: 0,
+      transferred: 0,
       all: 0,
       appliedFilters: 0,
     };
@@ -69,6 +78,8 @@ export const mutations = {
     $state.hasEndReached = {
       me: false,
       unassigned: false,
+      unattended: false,
+      transferred: false,
       all: false,
       appliedFilters: false,
     };

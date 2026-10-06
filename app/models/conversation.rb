@@ -19,6 +19,7 @@
 #  status_changed_at      :datetime
 #  uuid                   :uuid             not null
 #  waiting_since          :datetime
+#  transferred_at         :datetime
 #  created_at             :datetime         not null
 #  updated_at             :datetime         not null
 #  account_id             :integer          not null
@@ -93,6 +94,8 @@ class Conversation < ApplicationRecord
     order(unread_messages_count_arel.desc).sort_on_last_activity_at('desc')
   }
   scope :unattended, -> { where(first_reply_created_at: nil).or(where.not(waiting_since: nil)) }
+  # Handed from one agent to another and the new assignee has not replied yet
+  scope :transferred, -> { where.not(transferred_at: nil) }
   scope :resolvable_not_waiting, lambda { |auto_resolve_after|
     return none if auto_resolve_after.to_i.zero?
 
@@ -278,7 +281,7 @@ class Conversation < ApplicationRecord
     return unless saved_change_to_status? && status == 'resolved'
 
     # rubocop:disable Rails/SkipsModelValidations
-    update_column(:waiting_since, nil)
+    update_columns(waiting_since: nil, transferred_at: nil)
     # rubocop:enable Rails/SkipsModelValidations
   end
 
@@ -342,7 +345,7 @@ class Conversation < ApplicationRecord
 
   def list_of_keys
     %w[team_id assignee_id assignee_agent_bot_id ai_assignee_type status snoozed_until custom_attributes label_list waiting_since
-       first_reply_created_at priority]
+       first_reply_created_at priority transferred_at]
   end
 
   def allowed_keys?

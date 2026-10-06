@@ -4,10 +4,24 @@ module AssignmentHandler
 
   included do
     before_save :ensure_assignee_is_from_team
+    before_save :track_transfer
     after_commit :notify_assignment_change, :process_assignment_changes
   end
 
   private
+
+  # A transfer is an agent-to-agent handover. The conversation is flagged until the new
+  # assignee replies, and is put back in the "waiting on agent" state so it shows up as unattended.
+  def track_transfer
+    return unless assignee_id_changed?
+
+    if assignee_id.present? && assignee_id_was.present?
+      self.transferred_at = Time.current
+      self.waiting_since ||= Time.current
+    elsif assignee_id.blank?
+      self.transferred_at = nil
+    end
+  end
 
   def ensure_assignee_is_from_team
     return unless team_id_changed?

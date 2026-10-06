@@ -112,6 +112,21 @@ const getters = {
       return isUnAssigned && shouldFilter;
     });
   },
+  getUnattendedChats: _state => activeFilters => {
+    return _state.allConversations.filter(conversation => {
+      const isUnattended =
+        !conversation.first_reply_created_at || !!conversation.waiting_since;
+      const shouldFilter = applyPageFilters(conversation, activeFilters);
+      return isUnattended && shouldFilter;
+    });
+  },
+  getTransferredChats: _state => activeFilters => {
+    return _state.allConversations.filter(conversation => {
+      const isTransferred = !!conversation.transferred_at;
+      const shouldFilter = applyPageFilters(conversation, activeFilters);
+      return isTransferred && shouldFilter;
+    });
+  },
   getParticipatingChats: (_state, _, __, rootGetters) => activeFilters => {
     const currentUserId = rootGetters.getCurrentUser?.id;
     const getWatchers = rootGetters['conversationWatchers/getByConversationId'];

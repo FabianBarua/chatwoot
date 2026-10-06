@@ -6,6 +6,8 @@ const state = {
   mineCount: 0,
   unAssignedCount: 0,
   allCount: 0,
+  unattendedCount: 0,
+  transferredCount: 0,
 };
 
 export const getters = {
@@ -114,11 +116,15 @@ export const mutations = {
       mine_count: mineCount,
       unassigned_count: unAssignedCount,
       all_count: allCount,
+      unattended_count: unattendedCount = 0,
+      transferred_count: transferredCount = 0,
     } = {}
   ) {
     $state.mineCount = mineCount;
     $state.allCount = allCount;
     $state.unAssignedCount = unAssignedCount;
+    $state.unattendedCount = unattendedCount;
+    $state.transferredCount = transferredCount;
     $state.updatedOn = new Date();
   },
 };

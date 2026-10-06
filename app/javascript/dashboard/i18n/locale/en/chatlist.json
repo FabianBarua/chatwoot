@@ -18,8 +18,12 @@
     "ASSIGNEE_TYPE_TABS": {
       "me": "Mine",
       "unassigned": "Unassigned",
+      "unattended": "Unattended",
+      "transferred": "Transferred",
       "all": "All"
     },
+    "TRANSFERRED_BADGE": "Transferred",
+    "TRANSFERRED_TOOLTIP": "Transferred from another agent and not answered yet",
     "CHAT_STATUS_FILTER_ITEMS": {
       "open": {
         "TEXT": "Open"
