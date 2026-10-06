@@ -1,0 +1,20 @@
+menu,opcion,texto,accion,abre_menu,equipo_id,mensaje
+inicio,,"Por gentileza, selecione *CORRETAMENTE* o setor desejado abaixo:",titulo,,,
+inicio,1,Código Card / Ativação,menu,card,,
+inicio,2,Suporte Técnico Live (tv/box),menu,live,,
+inicio,3,Suporte Técnico Vod (tv/box),menu,vod,,
+inicio,4,Xplus Sat/Ghost,menu,sat,,
+inicio,5,Xplus Express,menu,express,,
+card,,*Código Card / Ativação*\nEscolha uma opção:,titulo,,,
+card,1,Falar com um atendente,equipo,,,Certo! Um atendente de *Ativação* vai te responder em instantes. 😊
+card,2,Como ativar meu código,cerrar,,,"Para ativar seu código: abra o app, vá em *Ativar Card*, digite o código e confirme. Se precisar de ajuda, é só escrever *Menu*. 💙"
+live,,*Suporte Técnico Live (tv/box)*\nEscolha uma opção:,titulo,,,
+live,1,Canais não abrem / travando,equipo,,,
+live,2,Falar com um atendente,equipo,,,
+vod,,*Suporte Técnico Vod (tv/box)*\nEscolha uma opção:,titulo,,,
+vod,1,Filmes / séries não carregam,equipo,,,
+vod,2,Falar com um atendente,equipo,,,
+sat,,*Xplus Sat/Ghost*\nEscolha uma opção:,titulo,,,
+sat,1,Falar com um atendente,equipo,,,
+express,,*Xplus Express*\nEscolha uma opção:,titulo,,,
+express,1,Falar com um atendente,equipo,,,

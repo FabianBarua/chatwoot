@@ -2,13 +2,13 @@
   "name": "Xplus - Menú de atención (Chatwoot)",
   "nodes": [
     {
-      "id": "f24495e9-ef6a-41d0-9a34-b91e78e742b4",
+      "id": "99d10f14-68b5-4772-b7e2-333af58ca200",
       "name": "Mensaje de Chatwoot",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
         0,
-        600
+        300
       ],
       "parameters": {
         "httpMethod": "POST",
@@ -19,16 +19,16 @@
           "onlyRunIf": "={{ $json.body.event === 'message_created' && $json.body.message_type === 'incoming' && $json.body.conversation?.status === 'pending' }}"
         }
       },
-      "webhookId": "bf01dbcd-4595-46b8-a0ab-ad97e76207e4"
+      "webhookId": "67f0f6b3-32de-4d15-850e-6a5b126007de"
     },
     {
-      "id": "349e230d-f7d7-4d62-9a79-576db61369cf",
+      "id": "bdb1dba0-f273-4023-8d8d-761ef9c4c963",
       "name": "Configuración",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
         240,
-        600
+        300
       ],
       "parameters": {
         "mode": "manual",
@@ -82,1854 +82,112 @@
       }
     },
     {
-      "id": "ed7aac60-9989-4b41-af2f-ee08f3ce476e",
-      "name": "Normalizar mensaje",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
+      "id": "c2dee32c-e6ce-4251-a959-87ac206b8be1",
+      "name": "Leer menús (tabla Menú Xplus)",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
       "position": [
         480,
-        600
+        300
       ],
       "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-base",
-              "name": "base",
-              "value": "={{ $('Configuración').item.json.chatwoot_url }}/api/v1/accounts/{{ $('Mensaje de Chatwoot').item.json.body.account.id }}/conversations/{{ $('Mensaje de Chatwoot').item.json.body.conversation.id }}",
-              "type": "string"
-            },
-            {
-              "id": "a1-texto",
-              "name": "texto",
-              "value": "={{ String($('Mensaje de Chatwoot').item.json.body.content ?? '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[*_~]/g, '').trim().toLowerCase() }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-numero",
-              "name": "numero",
-              "value": "={{ (String($('Mensaje de Chatwoot').item.json.body.content ?? '').replace(/[*_~]/g, '').trim().match(/^\\[?\\s*(\\d\\d?)\\s*\\]?[.)\\-\\s]*$/) || [])[1] ?? '' }}",
-              "type": "string"
-            },
-            {
-              "id": "a3-menu_actual",
-              "name": "menu_actual",
-              "value": "={{ $('Mensaje de Chatwoot').item.json.body.conversation.custom_attributes?.menu_actual ?? '' }}",
-              "type": "string"
-            },
-            {
-              "id": "a4-intentos",
-              "name": "intentos",
-              "value": "={{ Number($('Mensaje de Chatwoot').item.json.body.conversation.custom_attributes?.menu_intentos ?? 0) }}",
-              "type": "number"
-            }
-          ]
-        }
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gSTthYYqu0KMx8c3",
+          "cachedResultName": "Menú Xplus"
+        },
+        "returnAll": true
       }
     },
     {
-      "id": "4b79cec9-2aa9-4d6d-aa17-8d5da2af0523",
-      "name": "¿Qué pidió el cliente?",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
+      "id": "e063d386-6816-4b9f-9cd5-3a4b71d19660",
+      "name": "Decidir respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         720,
-        600
+        300
       ],
       "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "Encerrar",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ ['encerrar', 'finalizar'].includes($json.texto) }}",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "true",
-                      "singleValue": true
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Menu o primer mensaje",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.texto === 'menu' || $json.menu_actual === '' }}",
-                    "operator": {
-                      "type": "boolean",
-                      "operation": "true",
-                      "singleValue": true
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Elegir opción"
-        }
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Decide la respuesta del bot con los menús de la tabla \"Menú Xplus\".\n// No hace falta tocar este código: los menús se editan en la tabla y los textos en \"Configuración\".\nconst cfg = $('Configuración').first().json;\nconst conversacion = $('Mensaje de Chatwoot').first().json.body.conversation;\n\nconst normalizar = valor =>\n  String(valor ?? '')\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[*_~]/g, '')\n    .trim()\n    .toLowerCase();\nconst conSaltos = valor => String(valor ?? '').replace(/\\\\n/g, '\\n');\n\n// Menús armados con las filas de la tabla\nconst menus = {};\nfor (const { json: fila } of $input.all()) {\n  const clave = normalizar(fila.menu);\n  if (!clave) continue;\n  const menu = (menus[clave] ??= { titulo: '', opciones: {} });\n  if (normalizar(fila.accion) === 'titulo') menu.titulo = conSaltos(fila.texto);\n  else menu.opciones[String(fila.opcion ?? '').trim()] = fila;\n}\n\nconst mostrarMenu = clave => {\n  const menu = menus[clave];\n  const numeros = Object.keys(menu.opciones).sort((a, b) => Number(a) - Number(b));\n  const lineas = numeros.filter(n => n !== '0').map(n => ` [ ${n} ] - ${menu.opciones[n].texto}`);\n  if (clave !== 'inicio') lineas.push(` [ 0 ] - ${menu.opciones['0']?.texto || 'Voltar'}`);\n  return `${menu.titulo}\\n\\n${lineas.join('\\n')}\\n\\n${cfg.rodape}`;\n};\n\nconst respuesta = (accion, mensaje, menuSiguiente = '', intentos = 0, equipoId = '') => [\n  { json: { accion, mensaje, menu_siguiente: menuSiguiente, intentos, equipo_id: String(equipoId ?? '').trim() } },\n];\n\nconst atributos = conversacion.custom_attributes || {};\nconst menuActual = menus[atributos.menu_actual] ? atributos.menu_actual : '';\nconst intentos = Number(atributos.menu_intentos || 0);\nconst texto = normalizar($('Mensaje de Chatwoot').first().json.body.content);\nconst numero = (texto.match(/^\\[?\\s*(\\d{1,2})\\s*\\]?[.)\\-\\s]*$/) || [])[1];\n\nif (texto === 'encerrar' || texto === 'finalizar') return respuesta('cerrar', cfg.texto_encerrar);\nif (!menuActual || texto === 'menu') return respuesta('menu', mostrarMenu('inicio'), 'inicio');\n\nlet opcion = menus[menuActual].opciones[numero];\nif (!opcion && numero === '0' && menuActual !== 'inicio') opcion = { accion: 'menu', abre_menu: 'inicio' };\nconst accion = normalizar(opcion?.accion);\nconst destino = normalizar(opcion?.abre_menu);\n\nif (accion === 'menu' && menus[destino]) return respuesta('menu', mostrarMenu(destino), destino);\nif (accion === 'equipo') return respuesta('equipo', opcion.mensaje || cfg.texto_transferindo, '', 0, opcion.equipo_id);\nif (accion === 'cerrar') return respuesta('cerrar', opcion.mensaje || cfg.texto_encerrar);\n\n// Opción inválida: repite el menú y, a la N-ésima vez, pasa a un agente\nif (intentos + 1 >= Number(cfg.max_invalidas)) {\n  return respuesta('equipo', cfg.texto_transferindo, '', 0, cfg.equipo_fallback);\n}\nreturn respuesta('menu', `${cfg.texto_invalida}\\n\\n${mostrarMenu(menuActual)}`, menuActual, intentos + 1);\n"
       }
     },
     {
-      "id": "e312249e-f340-48e5-a267-29080ecdcf6a",
-      "name": "Encerrar: despedirse y cerrar",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        -260
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "cerrar",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_encerrar }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "2c191977-3b90-44a7-af70-c2a843bfa18d",
-      "name": "Mostrar menú principal",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        0
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "menu",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $json.invalida ? $('Configuración').item.json.texto_invalida + '\\n\\n' : '' }}Por gentileza, selecione *CORRETAMENTE* o setor desejado abaixo:\n\n [ 1 ] - Código Card / Ativação\n [ 2 ] - Suporte Técnico Live (tv/box)\n [ 3 ] - Suporte Técnico Vod (tv/box)\n [ 4 ] - Xplus Sat/Ghost\n [ 5 ] - Xplus Express\n\n{{ $('Configuración').item.json.rodape }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "inicio",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": "={{ $json.invalida ? $json.intentos_nuevos : 0 }}",
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "712b5f7c-5c9d-48bb-92cf-3fba38af498b",
-      "name": "¿En qué menú está?",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        960,
-        600
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "Menú principal",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "inicio"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Card",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "card"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Live",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "live"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Vod",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "vod"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Sat/ghost",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "sat"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Express",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "express"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Menú desconocido"
-        }
-      }
-    },
-    {
-      "id": "9c3c3184-6198-45d2-a2bf-ff498b080c1b",
-      "name": "Opciones del menú principal",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1260,
-        0
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "1 · Código Card / Ativação",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "1"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "2 · Suporte Técnico Live (tv/box)",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "2"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "3 · Suporte Técnico Vod (tv/box)",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "3"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "4 · Xplus Sat/Ghost",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "4"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "5 · Xplus Express",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "5"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Opción inválida"
-        }
-      }
-    },
-    {
-      "id": "ef064b58-352f-40ca-9597-0ffc75717939",
-      "name": "Opciones de Card",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1260,
-        900
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "1 · Falar com um atendente",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "1"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "2 · Como ativar meu código",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "2"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "0 · Voltar",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "0"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Opción inválida"
-        }
-      }
-    },
-    {
-      "id": "98bd2e49-1c35-4dce-a7d8-7935211acf56",
-      "name": "Opciones de Live",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1260,
-        1350
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "1 · Canais não abrem / travando",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "1"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "2 · Falar com um atendente",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "2"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "0 · Voltar",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "0"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Opción inválida"
-        }
-      }
-    },
-    {
-      "id": "7a23dd72-2bbb-449e-bb75-20e7e16d5273",
-      "name": "Opciones de VOD",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1260,
-        1800
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "1 · Filmes / séries não carregam",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "1"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "2 · Falar com um atendente",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "2"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "0 · Voltar",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "0"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Opción inválida"
-        }
-      }
-    },
-    {
-      "id": "bc836801-ee02-49f1-ab0f-9cd0ee005584",
-      "name": "Opciones de Sat/Ghost",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1260,
-        2250
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "1 · Falar com um atendente",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "1"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "0 · Voltar",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "0"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Opción inválida"
-        }
-      }
-    },
-    {
-      "id": "fd87c2ab-7406-4260-9127-e1a615c108c1",
-      "name": "Opciones de Express",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1260,
-        2550
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "1 · Falar com um atendente",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "1"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "0 · Voltar",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.numero }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "0"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Opción inválida"
-        }
-      }
-    },
-    {
-      "id": "35ae8185-a563-48c5-ab4b-ef0d2a40c8e0",
-      "name": "Mostrar menú Card",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        200
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "menu",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $json.invalida ? $('Configuración').item.json.texto_invalida + '\\n\\n' : '' }}*Código Card / Ativação*\nEscolha uma opção:\n\n [ 1 ] - Falar com um atendente\n [ 2 ] - Como ativar meu código\n [ 0 ] - Voltar\n\n{{ $('Configuración').item.json.rodape }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "card",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": "={{ $json.invalida ? $json.intentos_nuevos : 0 }}",
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "fed6cb5b-5d20-4f10-9fc6-99714993f5d3",
-      "name": "Mostrar menú Live",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        400
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "menu",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $json.invalida ? $('Configuración').item.json.texto_invalida + '\\n\\n' : '' }}*Suporte Técnico Live (tv/box)*\nEscolha uma opção:\n\n [ 1 ] - Canais não abrem / travando\n [ 2 ] - Falar com um atendente\n [ 0 ] - Voltar\n\n{{ $('Configuración').item.json.rodape }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "live",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": "={{ $json.invalida ? $json.intentos_nuevos : 0 }}",
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "413af0a2-bdac-4d50-94a8-416a4456828a",
-      "name": "Mostrar menú VOD",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        600
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "menu",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $json.invalida ? $('Configuración').item.json.texto_invalida + '\\n\\n' : '' }}*Suporte Técnico Vod (tv/box)*\nEscolha uma opção:\n\n [ 1 ] - Filmes / séries não carregam\n [ 2 ] - Falar com um atendente\n [ 0 ] - Voltar\n\n{{ $('Configuración').item.json.rodape }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "vod",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": "={{ $json.invalida ? $json.intentos_nuevos : 0 }}",
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "366b08fe-2675-4c42-9af2-f011e1602078",
-      "name": "Mostrar menú Sat/Ghost",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        800
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "menu",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $json.invalida ? $('Configuración').item.json.texto_invalida + '\\n\\n' : '' }}*Xplus Sat/Ghost*\nEscolha uma opção:\n\n [ 1 ] - Falar com um atendente\n [ 0 ] - Voltar\n\n{{ $('Configuración').item.json.rodape }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "sat",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": "={{ $json.invalida ? $json.intentos_nuevos : 0 }}",
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "0dd6f68f-0bde-445a-b4b2-38425a3b7218",
-      "name": "Mostrar menú Express",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1900,
-        1000
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "menu",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $json.invalida ? $('Configuración').item.json.texto_invalida + '\\n\\n' : '' }}*Xplus Express*\nEscolha uma opção:\n\n [ 1 ] - Falar com um atendente\n [ 0 ] - Voltar\n\n{{ $('Configuración').item.json.rodape }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "express",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": "={{ $json.invalida ? $json.intentos_nuevos : 0 }}",
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "7669441a-0822-4ecd-b2d4-67381aeb86d1",
-      "name": "Contar opción inválida",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1260,
-        2970
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": true,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-invalida",
-              "name": "invalida",
-              "value": true,
-              "type": "boolean"
-            },
-            {
-              "id": "a1-intentos_nuevos",
-              "name": "intentos_nuevos",
-              "value": "={{ $json.intentos + 1 }}",
-              "type": "number"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "a5958934-047a-4496-9a51-08eca2ceccdb",
-      "name": "Card 1: Falar com um atendente",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        900
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "Certo! Um atendente de *Ativação* vai te responder em instantes. 😊",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "86ff0098-61ba-407b-bb68-a81cd0474124",
-      "name": "Card 2: Como ativar meu código",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        1050
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "cerrar",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "Para ativar seu código: abra o app, vá em *Ativar Card*, digite o código e confirme. Se precisar de ajuda, é só escrever *Menu*. 💙",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "59e8c48a-4c47-4758-8a9b-ff8860d8c181",
-      "name": "Live 1: Canais não abrem / travando",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        1350
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "39042826-9fd1-4567-be8f-92c035b211fd",
-      "name": "Live 2: Falar com um atendente",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        1500
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "4f8c5d51-f161-4e1c-9a37-49dc9f50b35c",
-      "name": "VOD 1: Filmes / séries não carregam",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        1800
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "433b9008-b10e-4844-bea9-a717f0c8742e",
-      "name": "VOD 2: Falar com um atendente",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        1950
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "bcf456a2-887c-4b6b-90fa-523c4f60a378",
-      "name": "Sat/Ghost 1: Falar com um atendente",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        2250
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "11de8c73-c54a-4f04-8c82-a043a1c1de50",
-      "name": "Express 1: Falar com um atendente",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1580,
-        2550
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "9ec33e51-146a-41a0-b57e-5f3b4abda40f",
-      "name": "¿Se equivocó muchas veces?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1520,
-        2970
-      ],
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": false,
-            "leftValue": "",
-            "typeValidation": "loose"
-          },
-          "conditions": [
-            {
-              "leftValue": "={{ $json.intentos_nuevos }}",
-              "operator": {
-                "type": "number",
-                "operation": "gte"
-              },
-              "rightValue": "={{ $('Configuración').item.json.max_invalidas }}"
-            }
-          ],
-          "combinator": "and"
-        },
-        "looseTypeValidation": true
-      }
-    },
-    {
-      "id": "a8bb1315-f210-4ae1-9dfa-75fb1c2d67fe",
-      "name": "Pasar a un agente (muchos errores)",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.5,
-      "position": [
-        1820,
-        2890
-      ],
-      "parameters": {
-        "mode": "manual",
-        "includeOtherFields": false,
-        "assignments": {
-          "assignments": [
-            {
-              "id": "a0-accion",
-              "name": "accion",
-              "value": "equipo",
-              "type": "string"
-            },
-            {
-              "id": "a1-mensaje",
-              "name": "mensaje",
-              "value": "={{ $('Configuración').item.json.texto_transferindo }}",
-              "type": "string"
-            },
-            {
-              "id": "a2-menu_siguiente",
-              "name": "menu_siguiente",
-              "value": "",
-              "type": "string"
-            },
-            {
-              "id": "a3-intentos_siguientes",
-              "name": "intentos_siguientes",
-              "value": 0,
-              "type": "number"
-            },
-            {
-              "id": "a4-equipo_id",
-              "name": "equipo_id",
-              "value": "={{ $('Configuración').item.json.equipo_fallback }}",
-              "type": "string"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "ca490d5f-1e8f-4690-b0d4-052fc1b24216",
-      "name": "Volver a mostrar el menú",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        1820,
-        3090
-      ],
-      "parameters": {
-        "mode": "rules",
-        "rules": {
-          "values": [
-            {
-              "outputKey": "Menú principal",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "inicio"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Card",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "card"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Live",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "live"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Vod",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "vod"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Sat/ghost",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "sat"
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "outputKey": "Express",
-              "renameOutput": true,
-              "conditions": {
-                "options": {
-                  "caseSensitive": false,
-                  "leftValue": "",
-                  "typeValidation": "loose"
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.menu_actual }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "rightValue": "express"
-                  }
-                ],
-                "combinator": "and"
-              }
-            }
-          ]
-        },
-        "options": {}
-      }
-    },
-    {
-      "id": "0f8f008b-cf23-4631-949f-54e2c4c47058",
-      "name": "Respuesta lista",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        2260,
-        600
-      ],
-      "parameters": {}
-    },
-    {
-      "id": "11e127b6-13e4-4bab-a53c-a9013231533a",
+      "id": "0b87fd20-e635-47ad-9664-6588f3bf6772",
       "name": "Enviar mensaje al cliente",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2500,
-        600
+        960,
+        300
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $('Normalizar mensaje').item.json.base }}/messages",
+        "url": "={{ $('Configuración').item.json.chatwoot_url }}/api/v1/accounts/{{ $('Mensaje de Chatwoot').item.json.body.account.id }}/conversations/{{ $('Mensaje de Chatwoot').item.json.body.conversation.id }}/messages",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpTemplatedCustomAuth",
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ content: $('Respuesta lista').item.json.mensaje, message_type: 'outgoing', private: false }) }}",
+        "jsonBody": "={{ JSON.stringify({ content: $('Decidir respuesta').item.json.mensaje, message_type: 'outgoing', private: false }) }}",
         "options": {
           "timeout": 15000
         }
       }
     },
     {
-      "id": "e8b619f6-3c03-4908-97d0-d1611ca84f56",
+      "id": "cf0a8258-95a5-4b61-a3f1-b5015f98ed5b",
       "name": "Guardar menú del cliente",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2740,
-        600
+        1200,
+        300
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $('Normalizar mensaje').item.json.base }}/custom_attributes",
+        "url": "={{ $('Configuración').item.json.chatwoot_url }}/api/v1/accounts/{{ $('Mensaje de Chatwoot').item.json.body.account.id }}/conversations/{{ $('Mensaje de Chatwoot').item.json.body.conversation.id }}/custom_attributes",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpTemplatedCustomAuth",
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ merge: true, custom_attributes: { menu_actual: $('Respuesta lista').item.json.menu_siguiente, menu_intentos: $('Respuesta lista').item.json.intentos_siguientes } }) }}",
+        "jsonBody": "={{ JSON.stringify({ merge: true, custom_attributes: { menu_actual: $('Decidir respuesta').item.json.menu_siguiente, menu_intentos: $('Decidir respuesta').item.json.intentos } }) }}",
         "options": {
           "timeout": 15000
         }
       }
     },
     {
-      "id": "2a0cea11-dd15-4518-aa7e-c074fcdd41ef",
+      "id": "34822ce8-e61e-4dfc-b8d8-c7098cb5a691",
       "name": "¿Qué hacer después?",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        2980,
-        600
+        1440,
+        300
       ],
       "parameters": {
         "mode": "rules",
         "rules": {
           "values": [
             {
-              "outputKey": "Pasar a un equipo",
+              "outputKey": "Pasar a un agente",
               "renameOutput": true,
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose"
+                  "typeValidation": "strict"
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $('Respuesta lista').item.json.accion }}",
+                    "leftValue": "={{ $('Decidir respuesta').item.json.accion }}",
                     "operator": {
                       "type": "string",
                       "operation": "equals"
@@ -1945,13 +203,13 @@
               "renameOutput": true,
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose"
+                  "typeValidation": "strict"
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $('Respuesta lista').item.json.accion }}",
+                    "leftValue": "={{ $('Decidir respuesta').item.json.accion }}",
                     "operator": {
                       "type": "string",
                       "operation": "equals"
@@ -1964,28 +222,31 @@
             }
           ]
         },
-        "options": {}
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Esperar respuesta"
+        }
       }
     },
     {
-      "id": "7f27a5b4-9330-438d-aab4-cc919fed251d",
-      "name": "¿Tiene equipo elegido?",
+      "id": "527ce45d-e451-4547-a029-ef05902960e4",
+      "name": "¿Tiene equipo?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3220,
-        500
+        1680,
+        200
       ],
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": false,
+            "caseSensitive": true,
             "leftValue": "",
             "typeValidation": "loose"
           },
           "conditions": [
             {
-              "leftValue": "={{ String($('Respuesta lista').item.json.equipo_id ?? '') }}",
+              "leftValue": "={{ $('Decidir respuesta').item.json.equipo_id }}",
               "operator": {
                 "type": "string",
                 "operation": "notEmpty",
@@ -1999,63 +260,40 @@
       }
     },
     {
-      "id": "b45dbdab-e3d1-48bd-bd61-3bd7f101139d",
-      "name": "Cerrar conversación",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [
-        3220,
-        720
-      ],
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $('Normalizar mensaje').item.json.base }}/toggle_status",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpTemplatedCustomAuth",
-        "sendBody": true,
-        "contentType": "json",
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ status: 'resolved' }) }}",
-        "options": {
-          "timeout": 15000
-        }
-      }
-    },
-    {
-      "id": "cfe84ccb-4091-4490-97c2-a5901d49f872",
+      "id": "43c63811-b326-49a7-8c48-1f1e4a1da05e",
       "name": "Asignar equipo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        3460,
-        420
+        1920,
+        100
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $('Normalizar mensaje').item.json.base }}/assignments",
+        "url": "={{ $('Configuración').item.json.chatwoot_url }}/api/v1/accounts/{{ $('Mensaje de Chatwoot').item.json.body.account.id }}/conversations/{{ $('Mensaje de Chatwoot').item.json.body.conversation.id }}/assignments",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpTemplatedCustomAuth",
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ team_id: Number($('Respuesta lista').item.json.equipo_id) }) }}",
+        "jsonBody": "={{ JSON.stringify({ team_id: Number($('Decidir respuesta').item.json.equipo_id) }) }}",
         "options": {
           "timeout": 15000
         }
       }
     },
     {
-      "id": "7313bb59-22cf-45df-b8cc-ff8f83b25aaa",
+      "id": "eef2bc77-d148-4042-8ba3-f771717a2c5f",
       "name": "Pasar a los agentes",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        3700,
-        500
+        2160,
+        200
       ],
       "parameters": {
         "method": "POST",
-        "url": "={{ $('Normalizar mensaje').item.json.base }}/toggle_status",
+        "url": "={{ $('Configuración').item.json.chatwoot_url }}/api/v1/accounts/{{ $('Mensaje de Chatwoot').item.json.body.account.id }}/conversations/{{ $('Mensaje de Chatwoot').item.json.body.conversation.id }}/toggle_status",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpTemplatedCustomAuth",
         "sendBody": true,
@@ -2068,67 +306,69 @@
       }
     },
     {
-      "id": "44f06e8d-4698-4c6d-bb5e-67121a016ee1",
-      "name": "Nota: instalación",
+      "id": "c991cdd9-864a-4869-9c0f-5da3bd4bb1f3",
+      "name": "Cerrar conversación",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1680,
+        440
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Configuración').item.json.chatwoot_url }}/api/v1/accounts/{{ $('Mensaje de Chatwoot').item.json.body.account.id }}/conversations/{{ $('Mensaje de Chatwoot').item.json.body.conversation.id }}/toggle_status",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: 'resolved' }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      }
+    },
+    {
+      "id": "f5fe68a7-fbdf-4bc2-87d1-dc87fe5c25c1",
+      "name": "Esperar al cliente",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        640
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "46923496-ff8f-452c-a80b-5f7304a0cbd0",
+      "name": "Nota: Cómo editar el menú",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -60,
-        -80
+        -40,
+        -300
       ],
       "parameters": {
-        "content": "## Menú Xplus para Chatwoot\n\n**Instalación (una vez)**\n1. Chatwoot → Configuración → Bots → *Agregar bot* \"Menú Xplus\" con la URL de webhook `https://n8n-chat.xplusapp.org/webhook/xplus-menu`, y copiá su **token de acceso**.\n2. En cada nodo azul de *Enviar a Chatwoot*, credencial \"Chatwoot Bot Xplus\": plantilla `{\"headers\":{\"api_access_token\":\"{{api_key}}\"}}` y como `api_key` el token del **bot** (no el de un usuario).\n3. Publicá el workflow.\n4. Chatwoot → Bandejas → la bandeja → pestaña **Bot** → \"Menú Xplus\". Probá primero con la bandeja del sitio web.",
+        "content": "## Cómo editar el menú\n\n**Los menús están en la tabla “Menú Xplus”** (menú lateral → *Overview* → pestaña *Data tables*). Una fila por opción:\n\n- `menu`: en qué menú aparece (`inicio` es el principal).\n- `opcion`: el número que escribe el cliente.\n- `texto`: lo que se lee en el menú.\n- `accion`: `menu` abre otro menú (el de `abre_menu`) · `equipo` pasa a un agente del equipo `equipo_id` (vacío = cualquiera) · `cerrar` manda `mensaje` y cierra.\n- La fila con `accion` = `titulo` es el encabezado del menú. `\\n` = salto de línea.\n\nEl `0 - Voltar` se agrega solo. Textos generales y máximo de errores: nodo **Configuración**. Este workflow no hace falta tocarlo.",
         "color": 4,
-        "width": 560,
-        "height": 420
+        "width": 700,
+        "height": 500
       }
     },
     {
-      "id": "5a4d7bb1-fa88-4590-a0db-65cebc5fd074",
-      "name": "Nota: 1 · Entrada",
+      "id": "a7a1ae88-6b63-4947-8f5b-1155c60919c7",
+      "name": "Nota: Instalación (una vez)",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -60,
-        400
+        700,
+        -300
       ],
       "parameters": {
-        "content": "## 1 · Entrada\n\nTextos generales (pie del menú, opción inválida, transferencia, despedida), máximo de errores y equipo por defecto: nodo **Configuración**.",
+        "content": "## Instalación (una vez)\n\n1. Chatwoot → Configuración → Bots → *Agregar bot* \"Menú Xplus\", webhook `https://n8n-chat.xplusapp.org/webhook/xplus-menu`. Copiá el token.\n2. Credencial \"Chatwoot Bot Xplus\" en los 5 nodos HTTP: plantilla `{\"headers\":{\"api_access_token\":\"{{api_key}}\"}}`, `api_key` = token del bot.\n3. Publicá el workflow y elegí el bot en la bandeja (pestaña **Bot**).",
         "color": 7,
-        "width": 1160,
-        "height": 400
-      }
-    },
-    {
-      "id": "31794b06-d6e2-44ac-ae48-92d1ab1ac3fb",
-      "name": "Nota: 2 · Menús",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1160,
-        -480
-      ],
-      "parameters": {
-        "content": "## 2 · Menús\n\n- **Texto de cada menú**: nodos *Mostrar menú …*.\n- **Qué hace cada opción**: nodos *Card 1: …*, *Live 2: …*. `equipo_id` = ID del equipo en Chatwoot (Configuración → Equipos → número en la URL); vacío = cualquier agente.\n- **Agregar una opción**: regla nueva en *Opciones de …* (el número), un nodo de acción conectado a *Respuesta lista*, y la línea en *Mostrar menú …*.",
-        "color": 5,
-        "width": 960,
-        "height": 3760
-      }
-    },
-    {
-      "id": "1ebe6c81-cfbe-4406-9494-56ebfa4c252c",
-      "name": "Nota: 3 · Enviar a Chatwoot",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2180,
-        200
-      ],
-      "parameters": {
-        "content": "## 3 · Enviar a Chatwoot\n\nManda la respuesta, guarda en qué menú quedó el cliente y, según la opción, asigna el equipo y pasa la conversación a los agentes, o la cierra. No hace falta tocarlo.",
-        "color": 6,
-        "width": 1700,
-        "height": 680
+        "width": 620,
+        "height": 340
       }
     }
   ],
@@ -2148,546 +388,25 @@
       "main": [
         [
           {
-            "node": "Normalizar mensaje",
+            "node": "Leer menús (tabla Menú Xplus)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalizar mensaje": {
+    "Leer menús (tabla Menú Xplus)": {
       "main": [
         [
           {
-            "node": "¿Qué pidió el cliente?",
+            "node": "Decidir respuesta",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Qué pidió el cliente?": {
-      "main": [
-        [
-          {
-            "node": "Encerrar: despedirse y cerrar",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "¿En qué menú está?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿En qué menú está?": {
-      "main": [
-        [
-          {
-            "node": "Opciones del menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Opciones de Card",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Opciones de Live",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Opciones de VOD",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Opciones de Sat/Ghost",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Opciones de Express",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Opciones del menú principal": {
-      "main": [
-        [
-          {
-            "node": "Mostrar menú Card",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Live",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú VOD",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Sat/Ghost",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Express",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Contar opción inválida",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Opciones de Card": {
-      "main": [
-        [
-          {
-            "node": "Card 1: Falar com um atendente",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Card 2: Como ativar meu código",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Contar opción inválida",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Opciones de Live": {
-      "main": [
-        [
-          {
-            "node": "Live 1: Canais não abrem / travando",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Live 2: Falar com um atendente",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Contar opción inválida",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Opciones de VOD": {
-      "main": [
-        [
-          {
-            "node": "VOD 1: Filmes / séries não carregam",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "VOD 2: Falar com um atendente",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Contar opción inválida",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Opciones de Sat/Ghost": {
-      "main": [
-        [
-          {
-            "node": "Sat/Ghost 1: Falar com um atendente",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Contar opción inválida",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Opciones de Express": {
-      "main": [
-        [
-          {
-            "node": "Express 1: Falar com um atendente",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Contar opción inválida",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Contar opción inválida": {
-      "main": [
-        [
-          {
-            "node": "¿Se equivocó muchas veces?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Se equivocó muchas veces?": {
-      "main": [
-        [
-          {
-            "node": "Pasar a un agente (muchos errores)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Volver a mostrar el menú",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Volver a mostrar el menú": {
-      "main": [
-        [
-          {
-            "node": "Mostrar menú principal",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Card",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Live",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú VOD",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Sat/Ghost",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mostrar menú Express",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Card 1: Falar com um atendente": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Card 2: Como ativar meu código": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Live 1: Canais não abrem / travando": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Live 2: Falar com um atendente": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "VOD 1: Filmes / séries não carregam": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "VOD 2: Falar com um atendente": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Sat/Ghost 1: Falar com um atendente": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Express 1: Falar com um atendente": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Pasar a un agente (muchos errores)": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mostrar menú principal": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mostrar menú Card": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mostrar menú Live": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mostrar menú VOD": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mostrar menú Sat/Ghost": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mostrar menú Express": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Encerrar: despedirse y cerrar": {
-      "main": [
-        [
-          {
-            "node": "Respuesta lista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Respuesta lista": {
+    "Decidir respuesta": {
       "main": [
         [
           {
@@ -2709,36 +428,18 @@
         ]
       ]
     },
-    "Guardar menú del cliente": {
+    "Asignar equipo": {
       "main": [
         [
           {
-            "node": "¿Qué hacer después?",
+            "node": "Pasar a los agentes",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Qué hacer después?": {
-      "main": [
-        [
-          {
-            "node": "¿Tiene equipo elegido?",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Cerrar conversación",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Tiene equipo elegido?": {
+    "¿Tiene equipo?": {
       "main": [
         [
           {
@@ -2756,11 +457,36 @@
         ]
       ]
     },
-    "Asignar equipo": {
+    "¿Qué hacer después?": {
       "main": [
         [
           {
-            "node": "Pasar a los agentes",
+            "node": "¿Tiene equipo?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cerrar conversación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Esperar al cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar menú del cliente": {
+      "main": [
+        [
+          {
+            "node": "¿Qué hacer después?",
             "type": "main",
             "index": 0
           }
