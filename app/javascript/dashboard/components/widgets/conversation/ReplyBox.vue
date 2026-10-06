@@ -45,6 +45,13 @@ import {
 } from '../../../helper/AnalyticsHelper/events';
 import fileUploadMixin from 'dashboard/mixins/fileUploadMixin';
 import {
+  applyTextSignature,
+  getTextSignatureSettings,
+  isTextSignatureActive,
+  removeTextSignature,
+  textSignaturePrefill,
+} from 'dashboard/helper/textSignatureHelper';
+import {
   appendSignature,
   removeSignature,
   getEffectiveChannelType,
@@ -189,6 +196,8 @@ export default {
       messageSignature: 'getMessageSignature',
       currentUser: 'getCurrentUser',
       lastEmail: 'getLastEmailInSelectedChat',
+      // read by fileUploadMixin (direct uploads, size limits)
+      // eslint-disable-next-line vue/no-unused-properties
       globalConfig: 'globalConfig/get',
       isMetaMessageSendingDisabled: 'globalConfig/isMetaMessageSendingDisabled',
       accountId: 'getCurrentAccountId',
@@ -262,7 +271,10 @@ export default {
         : REPLY_EDITOR_MODES.REPLY;
     },
     hasMeaningfulEditorContent() {
-      const body = this.message || '';
+      let body = this.message || '';
+      if (this.isTextSignatureActive) {
+        body = removeTextSignature(body, this.textSignature);
+      }
       // Only strip the signature when it's actually being auto-appended.
       // If the toggle is off, the agent's text might happen to match their
       // saved signature and we'd incorrectly treat it as empty.
@@ -437,6 +449,13 @@ export default {
     },
     isSignatureEnabledForInbox() {
       return !this.isPrivate && this.sendWithSignature;
+    },
+    // Short text signature from Profile settings ("enviado por ..."), always sent with replies
+    textSignature() {
+      return getTextSignatureSettings(this.uiSettings);
+    },
+    isTextSignatureActive() {
+      return !this.isPrivate && isTextSignatureActive(this.textSignature);
     },
     isSignatureAvailable() {
       return !!this.messageSignature;
@@ -768,9 +787,34 @@ export default {
         this.inbox?.medium || ''
       );
 
-      return this.sendWithSignature
+      const draft = this.sendWithSignature
         ? appendSignature(message, this.messageSignature, effectiveChannelType)
         : removeSignature(message, this.messageSignature, effectiveChannelType);
+
+      return this.prefillTextSignature(draft);
+    },
+    // Visible text signatures start every new reply in the editor
+    prefillTextSignature(message) {
+      if (!this.isTextSignatureActive || this.hasMeaningfulContent(message)) {
+        return message;
+      }
+      return textSignaturePrefill(this.textSignature);
+    },
+    hasMeaningfulContent(message) {
+      let body = removeTextSignature(message || '', this.textSignature);
+      if (this.sendWithSignature && this.messageSignature) {
+        body = removeSignature(
+          body,
+          this.messageSignature,
+          getEffectiveChannelType(this.channelType, this.inbox?.medium || '')
+        );
+      }
+      return !!body.trim();
+    },
+    withTextSignature(message) {
+      return this.isTextSignatureActive
+        ? applyTextSignature(message, this.textSignature)
+        : message;
     },
     removeFromDraft() {
       if (this.conversationIdByRoute) {
@@ -875,16 +919,17 @@ export default {
         // To handle both cases, text and attachments are always sent as separate messages.
         const isOnInstagram = this.isAnInstagramChannel;
         const isOnTiktok = this.isATiktokChannel;
+        const outgoingMessage = this.withTextSignature(this.message);
         if ((isOnWhatsApp || isOnInstagram || isOnTiktok) && !this.isPrivate) {
           this.sendMessageAsMultipleMessages(
-            this.message,
+            outgoingMessage,
             copilotAcceptedMessage
           );
         } else {
-          const messagePayload = this.getMessagePayload(this.message);
+          const messagePayload = this.getMessagePayload(outgoingMessage);
           this.sendMessage(
             messagePayload,
-            this.message,
+            outgoingMessage,
             copilotAcceptedMessage
           );
         }
@@ -1050,6 +1095,7 @@ export default {
           effectiveChannelType
         );
       }
+      this.message = this.prefillTextSignature(this.message);
       this.attachedFiles = [];
       this.isRecordingAudio = false;
       this.resetReplyToMessage();
@@ -1147,6 +1193,29 @@ export default {
     removeAttachment(attachments) {
       this.attachedFiles = attachments;
     },
+    // Files stored on a canned response: the blob already exists, so the
+    // message is created with its signed id instead of uploading again.
+    onAttachCannedFiles(files) {
+      if (!this.showFileUpload) {
+        useAlert(this.$t('CANNED_MGMT.ATTACHMENTS.NOT_SUPPORTED'));
+        return;
+      }
+      files.forEach(file => {
+        this.attachedFiles.push({
+          id: `canned-${file.id}`,
+          currentChatId: this.currentChat.id,
+          resource: {
+            filename: file.filename,
+            content_type: file.content_type,
+            byte_size: file.byte_size,
+          },
+          isPrivate: this.isPrivate,
+          thumb: file.file_url,
+          blobSignedId: file.signed_id,
+          isVoiceMessage: false,
+        });
+      });
+    },
     setReplyToInPayload(payload) {
       if (this.inReplyTo?.id) {
         return {
@@ -1167,9 +1236,8 @@ export default {
         let caption =
           this.isAnInstagramChannel || this.isATiktokChannel ? '' : message;
         this.attachedFiles.forEach(attachment => {
-          const attachedFile = this.globalConfig.directUploadsEnabled
-            ? attachment.blobSignedId
-            : attachment.resource.file;
+          const attachedFile =
+            attachment.blobSignedId || attachment.resource.file;
           let attachmentPayload = {
             conversationId: this.currentChat.id,
             files: [attachedFile],
@@ -1224,7 +1292,7 @@ export default {
       if (this.attachedFiles && this.attachedFiles.length) {
         messagePayload.files = [];
         this.attachedFiles.forEach(attachment => {
-          if (this.globalConfig.directUploadsEnabled) {
+          if (attachment.blobSignedId) {
             messagePayload.files.push(attachment.blobSignedId);
             if (attachment.isVoiceMessage) {
               messagePayload.isVoiceMessage = true;
@@ -1443,6 +1511,7 @@ export default {
           @toggle-variables-menu="toggleVariablesMenu"
           @toggle-macros-menu="toggleMacrosMenu"
           @execute-macro="onExecuteMacro"
+          @attach-canned-files="onAttachCannedFiles"
           @clear-selection="clearEditorSelection"
           @execute-copilot-action="executeCopilotAction"
         />

@@ -73,16 +73,19 @@ const resolveContent = message =>
   );
 
 const records = computed(() =>
-  cannedResponses.value.map(({ id, short_code: shortCode, content }) => {
-    const resolved = resolveContent(content);
-    return {
-      id,
-      content,
-      resolved,
-      shortCode,
-      plainText: getPlainText(resolved).replace(/\s+/g, ' ').trim(),
-    };
-  })
+  cannedResponses.value.map(
+    ({ id, short_code: shortCode, content, files = [] }) => {
+      const resolved = resolveContent(content || '');
+      return {
+        id,
+        content: content || '',
+        resolved,
+        shortCode,
+        files,
+        plainText: getPlainText(resolved).replace(/\s+/g, ' ').trim(),
+      };
+    }
+  )
 );
 
 const filteredRecords = computed(() => {
@@ -94,18 +97,31 @@ const filteredRecords = computed(() => {
   ]);
 });
 
+const attachmentSummary = files =>
+  files.length ? t('CANNED_MGMT.ATTACHMENTS.COUNT', { n: files.length }) : '';
+
 const items = computed(() =>
   filteredRecords.value.map(record => ({
     id: record.id,
     content: record.content,
     resolved: record.resolved,
+    files: record.files,
     label: `/${record.shortCode}`,
     title: highlightMatches(`/${record.shortCode}`),
-    subtitle: highlightMatches(buildSnippet(record.plainText)),
+    subtitle: highlightMatches(
+      [attachmentSummary(record.files), buildSnippet(record.plainText)]
+        .filter(Boolean)
+        .join(' · ')
+    ),
   }))
 );
 
-const onSelect = item => emit('replace', item.content);
+const isImage = file => (file.content_type || '').startsWith('image/');
+
+// The editor inserts the text and hands the files to the reply box, which
+// attaches them to the outgoing message.
+const onSelect = item =>
+  emit('replace', { content: item.content, files: item.files });
 
 onMounted(() => store.dispatch('getCannedResponse'));
 </script>
@@ -127,10 +143,29 @@ onMounted(() => store.dispatch('getCannedResponse'));
     @remove-trigger="emit('removeTrigger')"
   >
     <template #preview="{ item }">
-      <div
-        v-dompurify-html="formatMessage(item?.resolved || '')"
-        class="px-4 py-3 prose prose-bubble !max-w-none prose-a:text-n-brand"
-      />
+      <div class="px-4 py-3 flex flex-col gap-2">
+        <div v-if="item?.files?.length" class="flex flex-wrap gap-2">
+          <template v-for="file in item.files" :key="file.id">
+            <img
+              v-if="isImage(file)"
+              :src="file.file_url"
+              class="h-24 max-w-[12rem] object-cover rounded-md"
+            />
+            <span
+              v-else
+              class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-n-slate-3 text-n-slate-12"
+            >
+              <span class="i-lucide-paperclip size-3.5" />
+              {{ file.filename }}
+            </span>
+          </template>
+        </div>
+        <div
+          v-if="item?.resolved"
+          v-dompurify-html="formatMessage(item.resolved)"
+          class="prose prose-bubble !max-w-none prose-a:text-n-brand"
+        />
+      </div>
     </template>
   </CaretAnchoredPicker>
 </template>

@@ -3,6 +3,23 @@ import * as MutationHelpers from 'shared/helpers/vuex/mutationHelpers';
 import * as types from '../mutation-types';
 import CannedResponseAPI from '../../api/cannedResponse';
 
+// Canned responses are sent as multipart so media files can travel with the text.
+const buildPayload = ({
+  short_code: shortCode,
+  content,
+  files = [],
+  remove_file_ids: removeFileIds = [],
+}) => {
+  const payload = new FormData();
+  payload.append('canned_response[short_code]', shortCode);
+  payload.append('canned_response[content]', content || '');
+  files.forEach(file => payload.append('canned_response[files][]', file));
+  removeFileIds.forEach(id =>
+    payload.append('canned_response[remove_file_ids][]', id)
+  );
+  return payload;
+};
+
 const state = {
   records: [],
   uiFlags: {
@@ -66,7 +83,7 @@ const actions = {
   ) {
     commit(types.default.SET_CANNED_UI_FLAG, { creatingItem: true });
     try {
-      const response = await CannedResponseAPI.create(cannedObj);
+      const response = await CannedResponseAPI.create(buildPayload(cannedObj));
       commit(types.default.ADD_CANNED, response.data);
       commit(types.default.SET_CANNED_UI_FLAG, { creatingItem: false });
       return response.data;
@@ -82,7 +99,10 @@ const actions = {
   ) {
     commit(types.default.SET_CANNED_UI_FLAG, { updatingItem: true });
     try {
-      const response = await CannedResponseAPI.update(id, updateObj);
+      const response = await CannedResponseAPI.update(
+        id,
+        buildPayload(updateObj)
+      );
       commit(types.default.EDIT_CANNED, response.data);
       commit(types.default.SET_CANNED_UI_FLAG, { updatingItem: false });
       return response.data;

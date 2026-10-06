@@ -215,9 +215,23 @@ const tableHeaders = computed(() => {
                   <span class="text-heading-3 text-n-slate-12 truncate block">
                     {{ cannedItem.short_code }}
                   </span>
-                  <p class="text-body-main text-n-slate-11 line-clamp-5">
+                  <p
+                    v-if="cannedItem.content"
+                    class="text-body-main text-n-slate-11 line-clamp-5"
+                  >
                     {{ getPlainText(cannedItem.content) }}
                   </p>
+                  <span
+                    v-if="cannedItem.files?.length"
+                    class="inline-flex items-center gap-1 text-xs text-n-slate-11"
+                  >
+                    <Icon icon="i-lucide-paperclip" class="size-3.5" />
+                    {{
+                      $t('CANNED_MGMT.ATTACHMENTS.COUNT', {
+                        n: cannedItem.files.length,
+                      })
+                    }}
+                  </span>
                 </div>
               </BaseTableCell>
 
@@ -256,6 +270,7 @@ const tableHeaders = computed(() => {
         :id="activeResponse.id"
         :edshort-code="activeResponse.short_code"
         :edcontent="activeResponse.content"
+        :edfiles="activeResponse.files || []"
         :on-close="hideEditPopup"
       />
     </woot-modal>

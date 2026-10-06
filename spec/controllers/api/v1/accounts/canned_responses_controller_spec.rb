@@ -25,7 +25,8 @@ RSpec.describe 'Canned Responses API', type: :request do
             as: :json
 
         expect(response).to have_http_status(:success)
-        expect(response.parsed_body).to eq(account.canned_responses.as_json)
+        expect(response.parsed_body.pluck('id')).to match_array(account.canned_responses.ids)
+        expect(response.parsed_body.first).to include('short_code', 'content', 'files' => [])
       end
 
       it 'returns all the canned responses the user searched for' do
@@ -42,9 +43,7 @@ RSpec.describe 'Canned Responses API', type: :request do
             as: :json
 
         expect(response).to have_http_status(:success)
-        expect(response.parsed_body).to eq(
-          [cr3, cr2, cr1].as_json
-        )
+        expect(response.parsed_body.pluck('id')).to eq([cr3.id, cr2.id, cr1.id])
       end
 
       it 'ignores null bytes in the search string' do
@@ -56,7 +55,7 @@ RSpec.describe 'Canned Responses API', type: :request do
             as: :json
 
         expect(response).to have_http_status(:success)
-        expect(response.parsed_body).to eq([matching_response].as_json)
+        expect(response.parsed_body.pluck('id')).to eq([matching_response.id])
       end
     end
   end

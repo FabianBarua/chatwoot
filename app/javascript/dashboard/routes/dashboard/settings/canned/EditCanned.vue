@@ -1,10 +1,11 @@
 <script>
 /* eslint no-console: 0 */
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength } from '@vuelidate/validators';
+import { required, requiredIf, minLength } from '@vuelidate/validators';
 import { useAlert } from 'dashboard/composables';
 import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
+import CannedAttachmentsInput from './CannedAttachmentsInput.vue';
 import Modal from '../../../../components/Modal.vue';
 
 export default {
@@ -12,11 +13,13 @@ export default {
     NextButton,
     Modal,
     WootMessageEditor,
+    CannedAttachmentsInput,
   },
   props: {
     id: { type: Number, default: null },
     edcontent: { type: String, default: '' },
     edshortCode: { type: String, default: '' },
+    edfiles: { type: Array, default: () => [] },
     onClose: { type: Function, default: () => {} },
   },
   setup() {
@@ -30,19 +33,30 @@ export default {
       },
       shortCode: this.edshortCode,
       content: this.edcontent,
+      files: [],
+      removedFileIds: [],
       show: true,
     };
   },
-  validations: {
-    shortCode: {
-      required,
-      minLength: minLength(2),
-    },
-    content: {
-      required,
-    },
+  validations() {
+    return {
+      shortCode: {
+        required,
+        minLength: minLength(2),
+      },
+      // A shortcut can be media only; text is optional when files remain attached.
+      content: {
+        required: requiredIf(() => !this.hasFiles),
+      },
+    };
   },
   computed: {
+    hasFiles() {
+      const kept = this.edfiles.filter(
+        file => !this.removedFileIds.includes(file.id)
+      );
+      return kept.length + this.files.length > 0;
+    },
     pageTitle() {
       return `${this.$t('CANNED_MGMT.EDIT.TITLE')} - ${this.edshortCode}`;
     },
@@ -67,6 +81,8 @@ export default {
           id: this.id,
           short_code: this.shortCode,
           content: this.content,
+          files: this.files,
+          remove_file_ids: this.removedFileIds,
         })
         .then(() => {
           // Reset Form, Show success message
@@ -122,6 +138,11 @@ export default {
             />
           </div>
         </div>
+        <CannedAttachmentsInput
+          v-model:new-files="files"
+          v-model:removed-file-ids="removedFileIds"
+          :existing-files="edfiles"
+        />
         <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
           <NextButton
             faded

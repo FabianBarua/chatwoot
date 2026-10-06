@@ -63,6 +63,13 @@
         "ERROR_MESSAGE": "Could not connect to Woot server. Please try again."
       }
     },
+    "ATTACHMENTS": {
+      "LABEL": "Attachments",
+      "HELP": "Images, videos or documents sent together with the shortcut. The text is optional when a file is attached.",
+      "ADD": "Add file",
+      "COUNT": "{n} attachment | {n} attachments",
+      "NOT_SUPPORTED": "This channel does not support attachments, so the shortcut files were not added."
+    },
     "DELETE": {
       "BUTTON_TEXT": "Delete",
       "API": {

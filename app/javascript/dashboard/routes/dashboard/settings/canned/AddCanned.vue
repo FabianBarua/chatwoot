@@ -1,11 +1,12 @@
 <script>
 import { useVuelidate } from '@vuelidate/core';
-import { required, minLength } from '@vuelidate/validators';
+import { required, requiredIf, minLength } from '@vuelidate/validators';
 import { useAlert } from 'dashboard/composables';
 
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import Modal from '../../../../components/Modal.vue';
 import WootMessageEditor from 'dashboard/components/widgets/WootWriter/Editor.vue';
+import CannedAttachmentsInput from './CannedAttachmentsInput.vue';
 
 export default {
   name: 'AddCanned',
@@ -13,6 +14,7 @@ export default {
     NextButton,
     Modal,
     WootMessageEditor,
+    CannedAttachmentsInput,
   },
   props: {
     responseContent: {
@@ -31,6 +33,7 @@ export default {
     return {
       shortCode: '',
       content: this.responseContent || '',
+      files: [],
       addCanned: {
         showLoading: false,
         message: '',
@@ -38,19 +41,23 @@ export default {
       show: true,
     };
   },
-  validations: {
-    shortCode: {
-      required,
-      minLength: minLength(2),
-    },
-    content: {
-      required,
-    },
+  validations() {
+    return {
+      shortCode: {
+        required,
+        minLength: minLength(2),
+      },
+      // A shortcut can be media only; text is optional when files are attached.
+      content: {
+        required: requiredIf(() => this.files.length === 0),
+      },
+    };
   },
   methods: {
     resetForm() {
       this.shortCode = '';
       this.content = '';
+      this.files = [];
       this.v$.shortCode.$reset();
       this.v$.content.$reset();
     },
@@ -62,6 +69,7 @@ export default {
         .dispatch('createCannedResponse', {
           short_code: this.shortCode,
           content: this.content,
+          files: this.files,
         })
         .then(() => {
           // Reset Form, Show success message
@@ -118,6 +126,7 @@ export default {
             />
           </div>
         </div>
+        <CannedAttachmentsInput v-model:new-files="files" />
         <div class="flex flex-row justify-end w-full gap-2 px-0 py-2">
           <NextButton
             faded

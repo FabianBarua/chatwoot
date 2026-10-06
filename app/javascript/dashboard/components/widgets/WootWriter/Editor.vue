@@ -112,6 +112,7 @@ const emit = defineEmits([
   'toggleToolsMenu',
   'toggleMacrosMenu',
   'executeMacro',
+  'attachCannedFiles',
   'clearSelection',
   'blur',
   'focus',
@@ -788,6 +789,16 @@ function insertSpecialContent(type, content) {
   useTrack(event_map[type]);
 }
 
+// Media-only shortcuts have no text to insert, so only the "/query" trigger is removed.
+const onSelectCannedResponse = ({ content, files }) => {
+  if (content) {
+    insertSpecialContent('cannedResponse', content);
+  } else {
+    removeSuggestionTrigger();
+  }
+  if (files?.length) emit('attachCannedFiles', files);
+};
+
 function handleLineBreakWhenCmdAndEnterToSendEnabled(event) {
   if (
     hasPressedCommandAndEnter(event) &&
@@ -970,7 +981,7 @@ useEmitter(BUS_EVENTS.INSERT_INTO_RICH_EDITOR, content => {
       :schema="editorSchema"
       @close="dismissCannedResponses"
       @remove-trigger="removeSuggestionTrigger"
-      @replace="content => insertSpecialContent('cannedResponse', content)"
+      @replace="onSelectCannedResponse"
     />
     <VariableList
       v-if="shouldShowVariables"

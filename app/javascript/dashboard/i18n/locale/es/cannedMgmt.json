@@ -63,6 +63,13 @@
         "ERROR_MESSAGE": "No se pudo conectar al servidor Woot, por favor inténtalo de nuevo más tarde"
       }
     },
+    "ATTACHMENTS": {
+      "LABEL": "Archivos adjuntos",
+      "HELP": "Imágenes, videos o documentos que se envían junto con el atajo. El texto es opcional cuando hay un archivo adjunto.",
+      "ADD": "Agregar archivo",
+      "COUNT": "{n} adjunto | {n} adjuntos",
+      "NOT_SUPPORTED": "Este canal no admite archivos adjuntos, por lo que no se agregaron los archivos del atajo."
+    },
     "DELETE": {
       "BUTTON_TEXT": "Eliminar",
       "API": {
