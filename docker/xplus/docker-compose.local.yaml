@@ -26,6 +26,8 @@ x-app: &app
     ACTIVE_STORAGE_SERVICE: local
     RAILS_SERVE_STATIC_FILES: "true"
     ENABLE_PUSH_RELAY_SERVER: "false"
+    # Permite que bots y webhooks llamen a servicios locales (por ejemplo n8n en Docker)
+    SAFE_FETCH_ALLOW_PRIVATE_NETWORK: "true"
   volumes:
     - storage:/app/storage
   depends_on:

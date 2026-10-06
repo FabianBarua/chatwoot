@@ -1,0 +1,114 @@
+{
+  "name": "Xplus - Menú de atención (Chatwoot)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Menú Xplus para Chatwoot\n\n1. Credencial **Header Auth** llamada `Chatwoot Bot Xplus`: Name `api_access_token`, Value = token del bot (Chatwoot → Configuración → Bots).\n2. Activá este workflow y copiá la **Production URL** del nodo *Chatwoot Bot*.\n3. En Chatwoot: Configuración → Bots → URL del webhook = esa URL; conectá el bot a la bandeja (Bandejas → la bandeja → Bot).\n4. Textos, submenús y equipos: nodo *Menú Xplus*, arriba de todo (CONFIG, TEXTOS, MENUS).\n\nGuía completa: docs/xplus/bot-menu/README.md",
+        "height": 340,
+        "width": 460,
+        "color": 4
+      },
+      "id": "49f884d0-858b-4e25-888b-a92aad50cd0f",
+      "name": "Instrucciones",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "xplus-menu",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "c551e906-43dd-413f-8cfb-e00c9785e2da",
+      "name": "Chatwoot Bot",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        480,
+        120
+      ],
+      "webhookId": "15a67f5c-1b39-450d-a4e5-6ffcb8c40e34"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Menú de atención Xplus para n8n (nodo Code, \"Run Once for All Items\").\n// Recibe el webhook del Agent Bot de Chatwoot y devuelve, en orden, las llamadas\n// a la API de Chatwoot que el nodo HTTP siguiente ejecuta.\n//\n// Para cambiar textos, opciones o equipos: editá CONFIG, TEXTOS y MENUS.\n\n// ===================== CONFIGURACIÓN =====================\nconst CONFIG = {\n  chatwootUrl: 'https://chatwoot.website',\n  // Respuestas inválidas seguidas antes de pasar la conversación a un agente\n  maxInvalidas: 3,\n  // Equipo para quien se equivoca maxInvalidas veces (null = cualquier agente de la bandeja)\n  equipoFallback: null,\n};\n\nconst TEXTOS = {\n  rodape:\n    'A qualquer momento você pode digitar *Menu* para voltar ao menu principal ou *Encerrar* para finalizar o atendimento.',\n  invalida: '❗ Opção inválida. Responda apenas com o *número* da opção desejada.',\n  transferindo: 'Certo! Em instantes um atendente do setor vai te responder. 😊',\n  encerrar: 'Atendimento encerrado. Obrigado pelo contato! 💙',\n};\n\n// Cada menú: titulo + opciones. Cada opción tiene un texto y UNA acción:\n//   ir:      'clave'                 -> abre otro menú\n//   equipo:  ID del equipo (o null)  -> pasa la conversación a ese equipo de Chatwoot\n//   cerrar:  'texto'                 -> manda el texto y finaliza la conversación\n// La opción 0 \"Voltar\" se agrega sola a todos los submenús (vuelve a `volver`, por defecto 'inicio').\n// Los IDs de equipo están en Chatwoot: Configuración → Equipos (número en la URL).\nconst MENUS = {\n  inicio: {\n    titulo: 'Por gentileza, selecione *CORRETAMENTE* o setor desejado abaixo:',\n    opciones: {\n      1: { texto: 'Código Card / Ativação', ir: 'card' },\n      2: { texto: 'Suporte Técnico Live (tv/box)', ir: 'live' },\n      3: { texto: 'Suporte Técnico Vod (tv/box)', ir: 'vod' },\n      4: { texto: 'Xplus Sat/Ghost', ir: 'sat' },\n      5: { texto: 'Xplus Express', ir: 'express' },\n    },\n  },\n  card: {\n    titulo: '*Código Card / Ativação*\\nEscolha uma opção:',\n    opciones: {\n      1: { texto: 'Falar com um atendente', equipo: null, mensaje: 'Certo! Um atendente de *Ativação* vai te responder em instantes. 😊' },\n      2: {\n        texto: 'Como ativar meu código',\n        cerrar: 'Para ativar seu código: abra o app, vá em *Ativar Card*, digite o código e confirme. Se precisar de ajuda, é só escrever *Menu*. 💙',\n      },\n    },\n  },\n  live: {\n    titulo: '*Suporte Técnico Live (tv/box)*\\nEscolha uma opção:',\n    opciones: {\n      1: { texto: 'Canais não abrem / travando', equipo: null },\n      2: { texto: 'Falar com um atendente', equipo: null },\n    },\n  },\n  vod: {\n    titulo: '*Suporte Técnico Vod (tv/box)*\\nEscolha uma opção:',\n    opciones: {\n      1: { texto: 'Filmes / séries não carregam', equipo: null },\n      2: { texto: 'Falar com um atendente', equipo: null },\n    },\n  },\n  sat: {\n    titulo: '*Xplus Sat/Ghost*\\nEscolha uma opção:',\n    opciones: {\n      1: { texto: 'Falar com um atendente', equipo: null },\n    },\n  },\n  express: {\n    titulo: '*Xplus Express*\\nEscolha uma opção:',\n    opciones: {\n      1: { texto: 'Falar com um atendente', equipo: null },\n    },\n  },\n};\n\n// Atributos de conversación donde el bot guarda en qué menú está el cliente\nconst ATTR_MENU = 'menu_actual';\nconst ATTR_INTENTOS = 'menu_intentos';\n\n// ===================== LÓGICA (no hace falta tocar) =====================\nconst body = $input.first().json.body ?? $input.first().json;\n\nconst normalizar = valor =>\n  String(valor ?? '')\n    .normalize('NFD')\n    .replace(/[̀-ͯ]/g, '')\n    .replace(/[*_~]/g, '')\n    .trim()\n    .toLowerCase();\n\nconst renderMenu = clave => {\n  const menu = MENUS[clave];\n  const lineas = Object.entries(menu.opciones).map(([num, op]) => ` [ ${num} ] - ${op.texto}`);\n  if (clave !== 'inicio') lineas.push(' [ 0 ] - Voltar');\n  return `${menu.titulo}\\n\\n${lineas.join('\\n')}\\n\\n${TEXTOS.rodape}`;\n};\n\n// Solo mensajes del cliente en conversaciones que todavía están con el bot (pendientes).\n// Si un agente ya la tomó, el bot no interviene.\nconst conversacion = body.conversation;\nif (\n  body.event !== 'message_created' ||\n  body.message_type !== 'incoming' ||\n  body.private ||\n  !conversacion ||\n  conversacion.status !== 'pending'\n) {\n  return [];\n}\n\nconst base = `${CONFIG.chatwootUrl}/api/v1/accounts/${body.account.id}/conversations/${conversacion.id}`;\nconst llamadas = [];\nconst enviar = texto =>\n  llamadas.push({ json: { method: 'POST', url: `${base}/messages`, body: { content: texto, message_type: 'outgoing', private: false } } });\nconst guardar = (menu, intentos = 0) =>\n  llamadas.push({\n    json: { method: 'POST', url: `${base}/custom_attributes`, body: { merge: true, custom_attributes: { [ATTR_MENU]: menu, [ATTR_INTENTOS]: intentos } } },\n  });\nconst pasarAEquipo = equipoId => {\n  if (equipoId) llamadas.push({ json: { method: 'POST', url: `${base}/assignments`, body: { team_id: equipoId } } });\n  // Una conversación pendiente que el bot abre pasa a los agentes (handoff) y entra a la auto-asignación\n  llamadas.push({ json: { method: 'POST', url: `${base}/toggle_status`, body: { status: 'open' } } });\n};\nconst cerrar = () => llamadas.push({ json: { method: 'POST', url: `${base}/toggle_status`, body: { status: 'resolved' } } });\n\nconst atributos = conversacion.custom_attributes || {};\nconst menuActual = MENUS[atributos[ATTR_MENU]] ? atributos[ATTR_MENU] : null;\nconst intentos = Number(atributos[ATTR_INTENTOS] || 0);\nconst texto = normalizar(body.content);\nconst numero = (texto.match(/^\\[?\\s*(\\d{1,2})\\s*\\]?[.)\\-\\s]*$/) || [])[1];\n\nif (texto === 'encerrar' || texto === 'finalizar') {\n  enviar(TEXTOS.encerrar);\n  guardar('', 0);\n  cerrar();\n} else if (!menuActual || texto === 'menu' || texto === 'menú') {\n  // Primer mensaje de la conversación, o el cliente pidió el menú\n  enviar(renderMenu('inicio'));\n  guardar('inicio', 0);\n} else {\n  const menu = MENUS[menuActual];\n  const opcion = numero === '0' && menuActual !== 'inicio' ? { ir: menu.volver || 'inicio' } : menu.opciones[numero];\n\n  if (!opcion) {\n    if (intentos + 1 >= CONFIG.maxInvalidas) {\n      enviar(TEXTOS.transferindo);\n      guardar('', 0);\n      pasarAEquipo(CONFIG.equipoFallback);\n    } else {\n      enviar(`${TEXTOS.invalida}\\n\\n${renderMenu(menuActual)}`);\n      guardar(menuActual, intentos + 1);\n    }\n  } else if (opcion.ir) {\n    enviar(renderMenu(opcion.ir));\n    guardar(opcion.ir, 0);\n  } else if ('equipo' in opcion) {\n    enviar(opcion.mensaje || TEXTOS.transferindo);\n    guardar('', 0);\n    pasarAEquipo(opcion.equipo);\n  } else if (opcion.cerrar) {\n    enviar(opcion.cerrar);\n    guardar('', 0);\n    cerrar();\n  }\n}\n\nreturn llamadas;\n"
+      },
+      "id": "97bb5c16-848e-46f3-ba1d-a81a753f1bd5",
+      "name": "Menú Xplus",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 400
+            }
+          }
+        }
+      },
+      "id": "4f88d0e2-82a4-46e8-862e-0449ce7b8905",
+      "name": "Chatwoot API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        120
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xplusChatwootBot",
+          "name": "Chatwoot Bot Xplus"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Chatwoot Bot": {
+      "main": [
+        [
+          {
+            "node": "Menú Xplus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menú Xplus": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "active": false
+}
