@@ -328,10 +328,10 @@
 
 # ------- Chatwoot Internal Config for Self Hosted ----#
 - name: INSTALLATION_PRICING_PLAN
-  value: 'community'
-  description: 'The pricing plan for the installation, retrieved from the billing API'
+  value: 'enterprise'
+  description: 'The pricing plan for the installation (fixed to enterprise in the Xplus edition)'
 - name: INSTALLATION_PRICING_PLAN_QUANTITY
-  value: 0
+  value: 10000
   description: 'The number of licenses purchased for the installation, retrieved from the billing API'
 - name: CHATWOOT_SUPPORT_WEBSITE_TOKEN
   value:
