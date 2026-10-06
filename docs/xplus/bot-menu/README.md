@@ -2,16 +2,18 @@
 
 Cuando un cliente escribe, el bot le muestra el menú de sectores, navega los submenús y, según la opción, pasa la conversación a un equipo o la cierra con un mensaje. Mientras el cliente está en el menú, la conversación queda en **Pendientes** y los agentes no la reciben.
 
-Archivos:
+El workflow ya está creado en n8n: **Xplus - Menú de atención (Chatwoot)**, en https://n8n-chat.xplusapp.org (proyecto personal Xplus Admin, sin publicar).
 
-- `menu-xplus.n8n.json`: workflow para importar en n8n.
-- `menu.js`: el mismo código del nodo *Menú Xplus*, para leerlo o versionarlo.
+Archivos de respaldo en este repo:
+
+- `menu-xplus.n8n.json`: el workflow para importar en otra instancia de n8n.
+- `menu.js`: el mismo código del nodo de decisión, para leerlo o versionarlo.
 
 ## Cómo funciona
 
-1. Chatwoot manda cada mensaje de la bandeja al webhook de n8n (Agent Bot).
-2. El nodo **Menú Xplus** decide la respuesta y devuelve las llamadas a la API de Chatwoot.
-3. El nodo **Chatwoot API** las ejecuta en orden: enviar mensaje, guardar el menú actual, asignar equipo, pasar a agentes o resolver.
+1. Chatwoot manda cada mensaje de la bandeja al webhook de n8n (Agent Bot). El nodo **Mensaje de Chatwoot** solo deja pasar mensajes del cliente en conversaciones pendientes; el resto no genera ejecuciones.
+2. El nodo **Decidir respuesta del menú** decide la respuesta y devuelve las llamadas a la API de Chatwoot.
+3. El nodo **Llamar API de Chatwoot** las ejecuta en orden: enviar mensaje, guardar el menú actual, asignar equipo, pasar a agentes o resolver.
 
 El menú actual del cliente se guarda en los atributos de la conversación `menu_actual` y `menu_intentos`.
 
@@ -28,17 +30,17 @@ El menú actual del cliente se guarda en los atributos de la conversación `menu
 
 ## Instalación
 
-1. **Crear el bot en Chatwoot.** Configuración → Bots → Agregar bot. Nombre "Menú Xplus" y URL del webhook temporal (se completa en el paso 4). Al guardarlo, copiá el **token de acceso** del bot.
-2. **Importar en n8n.** Workflows → Import from file → `menu-xplus.n8n.json`.
-3. **Credencial.** En el nodo *Chatwoot API*, credencial nueva de tipo **Header Auth**, llamada `Chatwoot Bot Xplus`: Name `api_access_token`, Value = el token del paso 1.
-4. **Activar.** Activá el workflow y copiá la **Production URL** del nodo *Chatwoot Bot* (termina en `/webhook/xplus-menu`). Pegala como URL del webhook del bot en Chatwoot.
+1. **Crear el bot en Chatwoot.** Configuración → Bots → Agregar bot. Nombre "Menú Xplus" y URL del webhook `https://n8n-chat.xplusapp.org/webhook/xplus-menu`. Al guardarlo, copiá el **token de acceso** del bot.
+2. **Credencial en n8n.** Abrí el workflow, nodo *Llamar API de Chatwoot*, credencial nueva "Chatwoot Bot Xplus" con la plantilla de headers `{"headers":{"api_access_token":"{{api_key}}"}}` y como `api_key` el token del paso 1. Usá el token del **bot**, no el de un usuario: con un usuario los mensajes salen a nombre de un agente y cuentan como respuesta humana.
+3. **Publicar.** Publicá el workflow (botón *Publish*). La URL del paso 1 es la Production URL del nodo *Mensaje de Chatwoot*.
+4. Si usás el archivo `menu-xplus.n8n.json` en otra instancia: Workflows → Import from file, y en el paso 2 podés usar una credencial **Header Auth** (Name `api_access_token`, Value = token del bot).
 5. **Conectar a la bandeja.** Configuración → Bandejas → la bandeja (por ejemplo WhatsApp) → pestaña **Bot** → elegí "Menú Xplus" y guardá.
 
 A partir de ese momento, las conversaciones nuevas de esa bandeja entran al menú. Para desactivarlo, quitá el bot de la bandeja.
 
 ## Configurar textos, submenús y equipos
 
-Todo está arriba del código del nodo **Menú Xplus**:
+Todo está arriba del código del nodo **Decidir respuesta del menú**:
 
 - `CONFIG.chatwootUrl`: la URL de Chatwoot.
 - `CONFIG.maxInvalidas`: respuestas inválidas antes de pasar a un agente.
