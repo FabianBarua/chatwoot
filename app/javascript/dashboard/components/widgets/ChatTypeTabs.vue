@@ -124,7 +124,7 @@ useKeyboardEvents(keyboardEvents);
       :class="[
         isInline
           ? 'h-10 flex-row items-center justify-center gap-1.5 px-2'
-          : 'flex-col items-center gap-0.5 pt-2 pb-2.5',
+          : 'flex-col items-center gap-0.5 px-0 pt-2 pb-2.5',
         isActive(item)
           ? 'text-n-slate-12'
           : 'text-n-slate-11 hover:text-n-slate-12',
@@ -149,7 +149,8 @@ useKeyboardEvents(keyboardEvents);
           {{ item.count }}
         </span>
         <span
-          class="w-full text-[0.6875rem] leading-[0.875rem] font-medium tracking-tight text-center line-clamp-2"
+          class="w-full text-[0.6875rem] leading-[0.875rem] tracking-tight text-center line-clamp-2"
+          :class="isActive(item) ? 'font-semibold' : 'font-medium'"
         >
           {{ item.name }}
         </span>
