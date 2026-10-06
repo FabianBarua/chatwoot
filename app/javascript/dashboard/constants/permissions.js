@@ -34,14 +34,6 @@ export const ASSIGNEE_TYPE_TAB_PERMISSIONS = {
     count: 'mineCount',
     permissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
   },
-  unassigned: {
-    count: 'unAssignedCount',
-    permissions: [
-      ...ROLES,
-      MANAGE_ALL_CONVERSATION_PERMISSIONS,
-      CONVERSATION_UNASSIGNED_PERMISSIONS,
-    ],
-  },
   // Waiting on an agent reply (no first reply yet, or the contact wrote last)
   unattended: {
     count: 'unattendedCount',
@@ -58,6 +50,14 @@ export const ASSIGNEE_TYPE_TAB_PERMISSIONS = {
       ...ROLES,
       MANAGE_ALL_CONVERSATION_PERMISSIONS,
       CONVERSATION_PARTICIPATING_PERMISSIONS,
+    ],
+  },
+  unassigned: {
+    count: 'unAssignedCount',
+    permissions: [
+      ...ROLES,
+      MANAGE_ALL_CONVERSATION_PERMISSIONS,
+      CONVERSATION_UNASSIGNED_PERMISSIONS,
     ],
   },
   all: {

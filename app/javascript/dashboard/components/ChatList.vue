@@ -942,7 +942,6 @@ watch(appliedFilters, () => resetBulkActions());
       v-if="!hasAppliedFiltersOrActiveFolders"
       :items="assigneeTabItems"
       :active-tab="activeAssigneeTab"
-      is-compact
       @chat-tab-change="updateAssigneeTab"
     />
 
