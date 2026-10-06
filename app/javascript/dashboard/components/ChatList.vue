@@ -310,7 +310,9 @@ function filterByAssigneeTab(conversations) {
   }
   if (activeAssigneeTab.value === wootConstants.ASSIGNEE_TYPE.UNATTENDED) {
     return conversations.filter(
-      c => !c.first_reply_created_at || !!c.waiting_since
+      c =>
+        c.meta?.assignee?.id === currentUser.value?.id &&
+        (!c.first_reply_created_at || !!c.waiting_since)
     );
   }
   if (activeAssigneeTab.value === wootConstants.ASSIGNEE_TYPE.TRANSFERRED) {

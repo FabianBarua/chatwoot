@@ -34,14 +34,10 @@ export const ASSIGNEE_TYPE_TAB_PERMISSIONS = {
     count: 'mineCount',
     permissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
   },
-  // Waiting on an agent reply (no first reply yet, or the contact wrote last)
+  // "Por responder": my conversations waiting on my reply (no first reply yet, or the contact wrote last)
   unattended: {
     count: 'unattendedCount',
-    permissions: [
-      ...ROLES,
-      MANAGE_ALL_CONVERSATION_PERMISSIONS,
-      CONVERSATION_PARTICIPATING_PERMISSIONS,
-    ],
+    permissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
   },
   // Handed over from one agent to another and not yet answered by the new one
   transferred: {

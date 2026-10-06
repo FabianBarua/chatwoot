@@ -112,12 +112,15 @@ const getters = {
       return isUnAssigned && shouldFilter;
     });
   },
-  getUnattendedChats: _state => activeFilters => {
+  // "Por responder": my conversations still waiting on my reply
+  getUnattendedChats: (_state, _, __, rootGetters) => activeFilters => {
+    const currentUserID = rootGetters.getCurrentUser?.id;
     return _state.allConversations.filter(conversation => {
+      const isMine = conversation.meta?.assignee?.id === currentUserID;
       const isUnattended =
         !conversation.first_reply_created_at || !!conversation.waiting_since;
       const shouldFilter = applyPageFilters(conversation, activeFilters);
-      return isUnattended && shouldFilter;
+      return isMine && isUnattended && shouldFilter;
     });
   },
   getTransferredChats: _state => activeFilters => {

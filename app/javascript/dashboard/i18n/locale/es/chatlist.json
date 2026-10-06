@@ -18,7 +18,7 @@
     "ASSIGNEE_TYPE_TABS": {
       "me": "Mías",
       "unassigned": "Sin asignar",
-      "unattended": "No atendidas",
+      "unattended": "Por responder",
       "transferred": "Transferidas",
       "all": "Todos"
     },

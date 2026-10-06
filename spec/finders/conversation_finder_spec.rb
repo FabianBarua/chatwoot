@@ -180,7 +180,7 @@ describe ConversationFinder do
                                        assigned_count: 4,
                                        unassigned_count: 1,
                                        all_count: 5,
-                                       unattended_count: 5,
+                                       unattended_count: 2,
                                        transferred_count: 0
                                      })
       end
@@ -277,7 +277,7 @@ describe ConversationFinder do
                                        assigned_count: 3,
                                        unassigned_count: 1,
                                        all_count: 4,
-                                       unattended_count: 4,
+                                       unattended_count: 2,
                                        transferred_count: 0
                                      })
       end

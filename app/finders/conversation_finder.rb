@@ -101,7 +101,8 @@ class ConversationFinder
     when 'assigned'
       @conversations = @conversations.assigned
     when 'unattended'
-      @conversations = @conversations.unattended
+      # "Por responder": the current agent's own conversations waiting on their reply
+      @conversations = @conversations.assigned_to(current_user).unattended
     when 'transferred'
       @conversations = @conversations.transferred
     end
@@ -177,7 +178,7 @@ class ConversationFinder
       Arel.sql("COUNT(*) FILTER (WHERE assignee_id = #{current_user.id})"),
       Arel.sql('COUNT(*) FILTER (WHERE assignee_id IS NULL AND assignee_agent_bot_id IS NULL)'),
       Arel.sql('COUNT(*)'),
-      Arel.sql('COUNT(*) FILTER (WHERE first_reply_created_at IS NULL OR waiting_since IS NOT NULL)'),
+      Arel.sql("COUNT(*) FILTER (WHERE assignee_id = #{current_user.id} AND (first_reply_created_at IS NULL OR waiting_since IS NOT NULL))"),
       Arel.sql('COUNT(*) FILTER (WHERE transferred_at IS NOT NULL)')
     )
     counts || [0, 0, 0, 0, 0]
@@ -188,7 +189,7 @@ class ConversationFinder
       @conversations.assigned_to(current_user).count,
       @conversations.unassigned.count,
       @conversations.count,
-      @conversations.unattended.count,
+      @conversations.assigned_to(current_user).unattended.count,
       @conversations.transferred.count
     ]
   end
