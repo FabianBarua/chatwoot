@@ -71,6 +71,31 @@
         "IMAGE_UPLOAD_SIZE_ERROR": "El tamaño de la imagen debe ser menor que {size}MB",
         "INLINE_IMAGE_WARNING": "Pasted inline images were removed. Please use the image upload button to add images to your signature."
       },
+      "TEXT_SIGNATURE_SECTION": {
+        "TITLE": "Firma en el texto",
+        "NOTE": "Una línea corta como \"enviado por Fabián\" que se agrega a todas las respuestas que envías, en la posición que elijas. Visible: aparece ya escrita en el editor; oculta: se agrega al enviar el mensaje.",
+        "TYPE_LABEL": "Tipo",
+        "POSITION_LABEL": "Posición",
+        "TYPES": {
+          "original": "Original (solo la firma personal)",
+          "visible": "En el texto, visible en el editor",
+          "hidden": "En el texto, oculta hasta enviar"
+        },
+        "POSITIONS": {
+          "start": "Inicio (línea propia)",
+          "start_inline": "Inicio en línea",
+          "end": "Final"
+        },
+        "TEXT": {
+          "LABEL": "Texto de la firma",
+          "PLACEHOLDER": "enviado por Fabián",
+          "ERROR": "Primero escribí el texto de la firma"
+        },
+        "PREVIEW": "Vista previa",
+        "BTN_TEXT": "Guardar firma en el texto",
+        "API_SUCCESS": "Firma en el texto guardada correctamente",
+        "API_ERROR": "No se pudo guardar la firma en el texto. Intentá de nuevo"
+      },
       "MESSAGE_SIGNATURE": {
         "LABEL": "Firma del mensaje",
         "ERROR": "La firma del mensaje no puede estar vacía",
@@ -372,6 +397,7 @@
     "REPORTS_SLA": "SLA",
     "REPORTS_BOT": "Bot",
     "REPORTS_AGENT": "Agentes",
+    "REPORTS_AGENT_ACTIVITY": "Actividad de agentes",
     "REPORTS_LABEL": "Etiquetas",
     "REPORTS_INBOX": "Bandeja de entrada",
     "REPORTS_TEAM": "Equipo",

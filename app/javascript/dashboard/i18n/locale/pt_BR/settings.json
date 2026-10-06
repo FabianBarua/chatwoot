@@ -71,6 +71,31 @@
         "IMAGE_UPLOAD_SIZE_ERROR": "O tamanho da imagem deve ser menor que {size}MB",
         "INLINE_IMAGE_WARNING": "Imagens incorporadas coladas foram removidas. Por favor, use o botão enviar imagem para adicionar imagens à sua assinatura."
       },
+      "TEXT_SIGNATURE_SECTION": {
+        "TITLE": "Assinatura no texto",
+        "NOTE": "Uma linha curta como \"enviado por Fabián\" adicionada a todas as respostas que você envia, na posição escolhida. Visível: aparece já escrita no editor; oculta: é adicionada ao enviar a mensagem.",
+        "TYPE_LABEL": "Tipo",
+        "POSITION_LABEL": "Posição",
+        "TYPES": {
+          "original": "Original (só a assinatura pessoal)",
+          "visible": "No texto, visível no editor",
+          "hidden": "No texto, oculta até enviar"
+        },
+        "POSITIONS": {
+          "start": "Início (linha própria)",
+          "start_inline": "Início inline",
+          "end": "Final"
+        },
+        "TEXT": {
+          "LABEL": "Texto da assinatura",
+          "PLACEHOLDER": "enviado por Fabián",
+          "ERROR": "Escreva primeiro o texto da assinatura"
+        },
+        "PREVIEW": "Pré-visualização",
+        "BTN_TEXT": "Salvar assinatura no texto",
+        "API_SUCCESS": "Assinatura no texto salva com sucesso",
+        "API_ERROR": "Não foi possível salvar a assinatura no texto. Tente novamente"
+      },
       "MESSAGE_SIGNATURE": {
         "LABEL": "Assinatura da mensagem",
         "ERROR": "Assinatura da mensagem não pode estar vazia",
@@ -372,6 +397,7 @@
     "REPORTS_SLA": "SLA",
     "REPORTS_BOT": "Robôs",
     "REPORTS_AGENT": "Agentes",
+    "REPORTS_AGENT_ACTIVITY": "Atividade dos agentes",
     "REPORTS_LABEL": "Etiquetas",
     "REPORTS_INBOX": "Caixa de Entrada",
     "REPORTS_TEAM": "Time",

@@ -5,6 +5,7 @@ import ReportsWrapper from './components/ReportsWrapper.vue';
 import Index from './Index.vue';
 
 import AgentReportsIndex from './AgentReportsIndex.vue';
+import AgentActivityReports from './AgentActivityReports.vue';
 import InboxReportsIndex from './InboxReportsIndex.vue';
 import TeamReportsIndex from './TeamReportsIndex.vue';
 import LabelReportsIndex from './LabelReportsIndex.vue';
@@ -68,6 +69,12 @@ const revisedReportRoutes = [
     name: 'agent_reports_show',
     meta,
     component: AgentReportsShow,
+  },
+  {
+    path: 'agents_activity',
+    name: 'agent_activity_reports',
+    meta,
+    component: AgentActivityReports,
   },
 
   {

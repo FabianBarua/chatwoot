@@ -216,6 +216,15 @@ es:
       avg_resolution_time: Tiempo promedio de resolución
       resolution_count: Número de resoluciones
       avg_customer_waiting_time: Tiempo promedio de espera del cliente
+    agent_activity_csv:
+      agent_name: Nombre del agente
+      email: Correo
+      online_time: Tiempo en línea
+      busy_time: Tiempo ocupado
+      sessions_count: Sesiones
+      first_online_at: Primera conexión
+      last_offline_at: Última desconexión
+      outgoing_messages_count: Mensajes enviados
     inbox_csv:
       inbox_name: Nombre de la bandeja de entrada
       inbox_type: Tipo de bandeja de entrada

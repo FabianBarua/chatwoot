@@ -216,6 +216,15 @@ pt_BR:
       avg_resolution_time: Tempo médio de resolução
       resolution_count: Contagem de Resolução
       avg_customer_waiting_time: Tempo médio de espera do cliente
+    agent_activity_csv:
+      agent_name: Nome do agente
+      email: E-mail
+      online_time: Tempo online
+      busy_time: Tempo ocupado
+      sessions_count: Sessões
+      first_online_at: Primeira conexão
+      last_offline_at: Última desconexão
+      outgoing_messages_count: Mensagens enviadas
     inbox_csv:
       inbox_name: Nome da Caixa de Entrada
       inbox_type: Tipo da Caixa de Entrada

@@ -31,6 +31,28 @@ class ReportsAPI extends ApiClient {
     });
   }
 
+  getAgentActivity({ since, until, userId }) {
+    return axios.get(`${this.baseUrl()}/agent_activity_reports`, {
+      params: {
+        since,
+        until,
+        user_id: userId,
+        timezone_offset: getTimeOffset(),
+      },
+    });
+  }
+
+  getAgentActivityCSV({ since, until, userId }) {
+    return axios.get(`${this.baseUrl()}/agent_activity_reports.csv`, {
+      params: {
+        since,
+        until,
+        user_id: userId,
+        timezone_offset: getTimeOffset(),
+      },
+    });
+  }
+
   getDrilldown({
     metric,
     bucketTimestamp,

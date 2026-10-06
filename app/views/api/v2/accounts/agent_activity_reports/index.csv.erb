@@ -1,0 +1,32 @@
+<%= CSVSafe.generate_line [I18n.t('reports.period', since: Date.strptime(params[:since], '%s'), until: Date.strptime(params[:until], '%s'))] %>
+
+<% headers = [
+    I18n.t('reports.agent_activity_csv.agent_name'),
+    I18n.t('reports.agent_activity_csv.email'),
+    I18n.t('reports.agent_activity_csv.online_time'),
+    I18n.t('reports.agent_activity_csv.busy_time'),
+    I18n.t('reports.agent_activity_csv.sessions_count'),
+    I18n.t('reports.agent_activity_csv.first_online_at'),
+    I18n.t('reports.agent_activity_csv.last_offline_at'),
+    I18n.t('reports.agent_csv.conversations_count'),
+    I18n.t('reports.agent_csv.resolution_count'),
+    I18n.t('reports.agent_csv.avg_first_response_time'),
+    I18n.t('reports.agent_activity_csv.outgoing_messages_count')
+  ]
+%>
+<%= CSVSafe.generate_line headers -%>
+<% @report_data.each do |row| %>
+<%= CSVSafe.generate_line [
+    row[:name],
+    row[:email],
+    Reports::TimeFormatPresenter.new(row[:online_seconds]).format,
+    Reports::TimeFormatPresenter.new(row[:busy_seconds]).format,
+    row[:sessions_count],
+    row[:first_online_at] && Time.zone.at(row[:first_online_at]).in_time_zone(@timezone).strftime('%Y-%m-%d %H:%M'),
+    row[:last_offline_at] && Time.zone.at(row[:last_offline_at]).in_time_zone(@timezone).strftime('%Y-%m-%d %H:%M'),
+    row[:conversations_count],
+    row[:resolved_conversations_count],
+    Reports::TimeFormatPresenter.new(row[:avg_first_response_time]).format,
+    row[:outgoing_messages_count]
+  ] -%>
+<% end %>

@@ -71,6 +71,31 @@
         "IMAGE_UPLOAD_SIZE_ERROR": "Image size should be less than {size}MB",
         "INLINE_IMAGE_WARNING": "Pasted inline images were removed. Please use the image upload button to add images to your signature."
       },
+      "TEXT_SIGNATURE_SECTION": {
+        "TITLE": "Text signature",
+        "NOTE": "A short line such as \"sent by Fabián\" added to every reply you send, in the position you choose. Visible means it is pre-filled in the editor; hidden means it is added when the message is sent.",
+        "TYPE_LABEL": "Type",
+        "POSITION_LABEL": "Position",
+        "TYPES": {
+          "original": "Original (personal signature only)",
+          "visible": "In the text, visible in the editor",
+          "hidden": "In the text, hidden until sent"
+        },
+        "POSITIONS": {
+          "start": "Start (own line)",
+          "start_inline": "Start (same line)",
+          "end": "End"
+        },
+        "TEXT": {
+          "LABEL": "Signature text",
+          "PLACEHOLDER": "sent by Fabián",
+          "ERROR": "Write the signature text first"
+        },
+        "PREVIEW": "Preview",
+        "BTN_TEXT": "Save text signature",
+        "API_SUCCESS": "Text signature saved successfully",
+        "API_ERROR": "Couldn't save the text signature! Try again"
+      },
       "MESSAGE_SIGNATURE": {
         "LABEL": "Message Signature",
         "ERROR": "Message Signature cannot be empty",
@@ -373,6 +398,7 @@
     "REPORTS_SLA": "SLA",
     "REPORTS_BOT": "Bot",
     "REPORTS_AGENT": "Agents",
+    "REPORTS_AGENT_ACTIVITY": "Agent activity",
     "REPORTS_LABEL": "Labels",
     "REPORTS_INBOX": "Inbox",
     "REPORTS_TEAM": "Team",

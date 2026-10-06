@@ -222,6 +222,50 @@
       "PLACEHOLDER": "Select date range"
     }
   },
+  "AGENT_ACTIVITY_REPORTS": {
+    "HEADER": "Agent activity",
+    "DESCRIPTION": "Follow when each agent was online, busy or offline, how long they stayed connected and what they handled in the period. Expand a row to see every status change.",
+    "DOWNLOAD": "Download CSV",
+    "ALL_AGENTS": "All agents",
+    "LOADING": "Loading agent activity...",
+    "NO_DATA": "No agents to show for this period.",
+    "STATUS": {
+      "online": "Online",
+      "busy": "Busy",
+      "offline": "Offline"
+    },
+    "TABLE": {
+      "AGENT": "Agent",
+      "CURRENT_STATUS": "Status now",
+      "ONLINE_TIME": "Online time",
+      "BUSY_TIME": "Busy time",
+      "SESSIONS": "Sessions",
+      "FIRST_ONLINE": "First online",
+      "LAST_OFFLINE": "Last offline",
+      "CONVERSATIONS": "Conversations",
+      "RESOLVED": "Resolved",
+      "AVG_FIRST_RESPONSE": "Avg. first response",
+      "AVG_REPLY_TIME": "Avg. reply time",
+      "MESSAGES_SENT": "Messages sent"
+    },
+    "DETAIL": {
+      "STATUS": "Status",
+      "TIMELINE": "Status changes",
+      "DAILY": "Per day",
+      "FROM": "From",
+      "TO": "To",
+      "DURATION": "Duration",
+      "DATE": "Date",
+      "NOW": "now",
+      "EMPTY": "No status changes were recorded in this period."
+    },
+    "TOTALS": {
+      "ONLINE": "Total online",
+      "BUSY": "Total busy",
+      "SESSIONS": "Sessions",
+      "AGENTS_ONLINE": "Agents online now"
+    }
+  },
   "LABEL_REPORTS": {
     "HEADER": "Labels Overview",
     "DESCRIPTION": "Track label performance with key metrics including conversations, response times, resolution times, and resolved cases. Click a label name for detailed insights.",

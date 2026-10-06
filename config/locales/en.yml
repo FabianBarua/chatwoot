@@ -244,6 +244,15 @@ en:
       avg_resolution_time: Avg resolution time
       resolution_count: Resolution Count
       avg_customer_waiting_time: Avg customer waiting time
+    agent_activity_csv:
+      agent_name: Agent name
+      email: Email
+      online_time: Online time
+      busy_time: Busy time
+      sessions_count: Sessions
+      first_online_at: First online
+      last_offline_at: Last offline
+      outgoing_messages_count: Messages sent
     inbox_csv:
       inbox_name: Inbox name
       inbox_type: Inbox type

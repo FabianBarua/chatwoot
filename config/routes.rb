@@ -557,6 +557,7 @@ Rails.application.routes.draw do
               get :outgoing_messages_count
             end
           end
+          resources :agent_activity_reports, only: [:index]
           resource :year_in_review, only: [:show]
           resources :live_reports, only: [] do
             collection do

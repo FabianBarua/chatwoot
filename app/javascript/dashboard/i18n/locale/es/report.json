@@ -222,6 +222,50 @@
       "PLACEHOLDER": "Seleccione rango de fechas"
     }
   },
+  "AGENT_ACTIVITY_REPORTS": {
+    "HEADER": "Actividad de agentes",
+    "DESCRIPTION": "Seguí cuándo cada agente estuvo en línea, ocupado o desconectado, cuánto tiempo estuvo conectado y qué atendió en el período. Expandí una fila para ver cada cambio de estado.",
+    "DOWNLOAD": "Descargar CSV",
+    "ALL_AGENTS": "Todos los agentes",
+    "LOADING": "Cargando actividad de agentes...",
+    "NO_DATA": "No hay agentes para mostrar en este período.",
+    "STATUS": {
+      "online": "En línea",
+      "busy": "Ocupado",
+      "offline": "Desconectado"
+    },
+    "TABLE": {
+      "AGENT": "Agente",
+      "CURRENT_STATUS": "Estado actual",
+      "ONLINE_TIME": "Tiempo en línea",
+      "BUSY_TIME": "Tiempo ocupado",
+      "SESSIONS": "Sesiones",
+      "FIRST_ONLINE": "Primera conexión",
+      "LAST_OFFLINE": "Última desconexión",
+      "CONVERSATIONS": "Conversaciones",
+      "RESOLVED": "Resueltas",
+      "AVG_FIRST_RESPONSE": "Prom. primera respuesta",
+      "AVG_REPLY_TIME": "Prom. tiempo de respuesta",
+      "MESSAGES_SENT": "Mensajes enviados"
+    },
+    "DETAIL": {
+      "STATUS": "Estado",
+      "TIMELINE": "Cambios de estado",
+      "DAILY": "Por día",
+      "FROM": "Desde",
+      "TO": "Hasta",
+      "DURATION": "Duración",
+      "DATE": "Fecha",
+      "NOW": "ahora",
+      "EMPTY": "No se registraron cambios de estado en este período."
+    },
+    "TOTALS": {
+      "ONLINE": "Total en línea",
+      "BUSY": "Total ocupado",
+      "SESSIONS": "Sesiones",
+      "AGENTS_ONLINE": "Agentes en línea ahora"
+    }
+  },
   "LABEL_REPORTS": {
     "HEADER": "Resumen de etiquetas",
     "DESCRIPTION": "Track label performance with key metrics including conversations, response times, resolution times, and resolved cases. Click a label name for detailed insights.",

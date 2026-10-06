@@ -20,6 +20,12 @@ trigger_hourly_scheduled_items_job:
   class: 'Internal::TriggerHourlyScheduledItemsJob'
   queue: scheduled_jobs
 
+# executed every minute: records agents going online / busy / offline for the activity report
+agent_availability_snapshot_job:
+  cron: '*/1 * * * *'
+  class: 'Agents::AvailabilitySnapshotJob'
+  queue: scheduled_jobs
+
 # executed At every minute..
 trigger_imap_email_inboxes_job:
   cron: '*/1 * * * *'
