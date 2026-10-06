@@ -39,14 +39,10 @@ export const ASSIGNEE_TYPE_TAB_PERMISSIONS = {
     count: 'unattendedCount',
     permissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
   },
-  // Handed over from one agent to another and not yet answered by the new one
+  // Transferred to me by another agent and not answered by me yet
   transferred: {
     count: 'transferredCount',
-    permissions: [
-      ...ROLES,
-      MANAGE_ALL_CONVERSATION_PERMISSIONS,
-      CONVERSATION_PARTICIPATING_PERMISSIONS,
-    ],
+    permissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
   },
   unassigned: {
     count: 'unAssignedCount',

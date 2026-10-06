@@ -123,11 +123,14 @@ const getters = {
       return isMine && isUnattended && shouldFilter;
     });
   },
-  getTransferredChats: _state => activeFilters => {
+  // Transferred to me by someone else and not answered by me yet
+  getTransferredChats: (_state, _, __, rootGetters) => activeFilters => {
+    const currentUserID = rootGetters.getCurrentUser?.id;
     return _state.allConversations.filter(conversation => {
+      const isMine = conversation.meta?.assignee?.id === currentUserID;
       const isTransferred = !!conversation.transferred_at;
       const shouldFilter = applyPageFilters(conversation, activeFilters);
-      return isTransferred && shouldFilter;
+      return isMine && isTransferred && shouldFilter;
     });
   },
   getParticipatingChats: (_state, _, __, rootGetters) => activeFilters => {

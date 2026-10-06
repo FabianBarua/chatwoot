@@ -189,11 +189,7 @@ const assigneeTabItems = computed(() => {
 const showAssigneeInConversationCard = computed(() => {
   return (
     hasAppliedFiltersOrActiveFolders.value ||
-    [
-      wootConstants.ASSIGNEE_TYPE.ALL,
-      wootConstants.ASSIGNEE_TYPE.UNATTENDED,
-      wootConstants.ASSIGNEE_TYPE.TRANSFERRED,
-    ].includes(activeAssigneeTab.value)
+    activeAssigneeTab.value === wootConstants.ASSIGNEE_TYPE.ALL
   );
 });
 
@@ -316,7 +312,9 @@ function filterByAssigneeTab(conversations) {
     );
   }
   if (activeAssigneeTab.value === wootConstants.ASSIGNEE_TYPE.TRANSFERRED) {
-    return conversations.filter(c => !!c.transferred_at);
+    return conversations.filter(
+      c => c.meta?.assignee?.id === currentUser.value?.id && !!c.transferred_at
+    );
   }
   return [...conversations];
 }
