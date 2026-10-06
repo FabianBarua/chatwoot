@@ -11,6 +11,7 @@ import { parseBoolean } from '@chatwoot/utils';
 import UserProfilePicture from './UserProfilePicture.vue';
 import UserBasicDetails from './UserBasicDetails.vue';
 import MessageSignature from './MessageSignature.vue';
+import TextSignature from './TextSignature.vue';
 import FontSize from './FontSize.vue';
 import UserLanguageSelect from './UserLanguageSelect.vue';
 import ChangePassword from './ChangePassword.vue';
@@ -31,6 +32,7 @@ import {
 export default {
   components: {
     MessageSignature,
+    TextSignature,
     SectionLayout,
     FontSize,
     UserLanguageSelect,
@@ -282,6 +284,13 @@ export default {
         :message-signature="messageSignature"
         @update-signature="updateSignature"
       />
+    </SectionLayout>
+    <SectionLayout
+      with-border
+      :title="$t('PROFILE_SETTINGS.FORM.TEXT_SIGNATURE_SECTION.TITLE')"
+      :description="$t('PROFILE_SETTINGS.FORM.TEXT_SIGNATURE_SECTION.NOTE')"
+    >
+      <TextSignature />
     </SectionLayout>
     <SectionLayout
       with-border
