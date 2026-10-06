@@ -3,6 +3,7 @@ import { computed, nextTick, ref, useTemplateRef } from 'vue';
 import { useElementSize } from '@vueuse/core';
 import { useKeyboardEvents } from 'dashboard/composables/useKeyboardEvents';
 import wootConstants from 'dashboard/constants/globals';
+import Icon from 'dashboard/components-next/icon/Icon.vue';
 
 const props = defineProps({
   items: {
@@ -17,29 +18,30 @@ const props = defineProps({
 
 const emit = defineEmits(['chatTabChange']);
 
+const TAB_ICONS = {
+  me: 'i-lucide-user-round',
+  unattended: 'i-lucide-clock-alert',
+  transferred: 'i-lucide-arrow-right-left',
+  unassigned: 'i-lucide-user-round-x',
+  all: 'i-lucide-inbox',
+};
+
 // Tabs whose conversations are waiting on an agent: a non-zero count is highlighted
 const ATTENTION_TABS = ['unattended', 'transferred'];
 
-// Static class names so Tailwind generates them (agents see 3 to 5 tabs depending on permissions)
-const GRID_COLUMNS = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-2',
-  3: 'grid-cols-3',
-  4: 'grid-cols-4',
-  5: 'grid-cols-5',
-};
-
-// Below this width per tab the count goes above the name instead of beside it
-const MIN_INLINE_TAB_WIDTH = 112;
+// Width per tab from which every tab can show its name on one line
+const MIN_LABELLED_TAB_WIDTH = 112;
 
 const container = useTemplateRef('container');
 const tabRefs = ref([]);
 const { width } = useElementSize(container);
 
-const isInline = computed(
+// Narrow list: only the active tab shows its name, the rest are icon + count.
+// Wide list: every tab shows icon, name and count. Either way nothing wraps.
+const showAllLabels = computed(
   () =>
     props.items.length > 0 &&
-    width.value / props.items.length >= MIN_INLINE_TAB_WIDTH
+    width.value / props.items.length >= MIN_LABELLED_TAB_WIDTH
 );
 
 const activeTabIndex = computed(() =>
@@ -47,20 +49,25 @@ const activeTabIndex = computed(() =>
 );
 
 const isActive = item => item.key === props.activeTab;
+const showsLabel = item => showAllLabels.value || isActive(item);
 const needsAttention = item =>
   ATTENTION_TABS.includes(item.key) && item.count > 0;
+
+// Keeps four-digit totals from widening an icon-only tab
+const formatCount = count =>
+  count >= 1000 ? `${Math.floor(count / 100) / 10}k` : String(count);
+
+const toneClass = item => {
+  if (isActive(item)) return 'text-n-blue-11';
+  if (needsAttention(item)) return 'text-n-amber-11';
+  return '';
+};
 
 const countClass = item => {
   if (isActive(item)) return 'text-n-blue-11';
   if (needsAttention(item)) return 'text-n-amber-11';
   if (!item.count) return 'text-n-slate-10';
   return 'text-n-slate-12';
-};
-
-const badgeClass = item => {
-  if (isActive(item)) return 'bg-n-blue-3 text-n-blue-11';
-  if (needsAttention(item)) return 'bg-n-amber-3 text-n-amber-11';
-  return 'bg-n-alpha-1 text-n-slate-10';
 };
 
 const onTabChange = selectedTabIndex => {
@@ -107,24 +114,21 @@ useKeyboardEvents(keyboardEvents);
   <div
     ref="container"
     role="tablist"
-    class="grid w-full px-0.5 border-b border-n-weak"
-    :class="GRID_COLUMNS[items.length] || 'grid-cols-5'"
+    class="flex w-full gap-0.5 px-1 border-b border-n-weak"
   >
     <button
       v-for="(item, index) in items"
       :key="item.key"
       :ref="el => (tabRefs[index] = el)"
-      v-tooltip.bottom="isInline ? null : item.name"
+      v-tooltip.bottom="showsLabel(item) ? null : item.name"
       type="button"
       role="tab"
       :aria-selected="isActive(item)"
-      :aria-label="`${item.name} ${item.count}`"
+      :aria-label="`${item.name}: ${item.count}`"
       :tabindex="isActive(item) ? 0 : -1"
-      class="group relative -mb-px flex min-w-0 select-none outline-none transition-colors duration-150 focus-visible:rounded-md focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-n-brand"
+      class="group relative -mb-px flex h-10 min-w-0 items-center justify-center gap-1.5 px-2 select-none outline-none whitespace-nowrap transition-colors duration-150 focus-visible:rounded-md focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-n-brand"
       :class="[
-        isInline
-          ? 'h-10 flex-row items-center justify-center gap-1.5 px-2'
-          : 'flex-col items-center gap-0.5 px-0 pt-2 pb-2.5',
+        showAllLabels || !isActive(item) ? 'flex-1' : 'flex-none',
         isActive(item)
           ? 'text-n-slate-12'
           : 'text-n-slate-11 hover:text-n-slate-12',
@@ -132,37 +136,31 @@ useKeyboardEvents(keyboardEvents);
       @click="onTabChange(index)"
       @keydown="onKeydown($event, index)"
     >
-      <template v-if="isInline">
-        <span class="text-sm font-medium truncate">{{ item.name }}</span>
-        <span
-          class="flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full text-xs font-medium tabular-nums"
-          :class="badgeClass(item)"
-        >
-          {{ item.count }}
-        </span>
-      </template>
-      <template v-else>
-        <span
-          class="text-[0.9375rem] leading-5 font-semibold tabular-nums"
-          :class="countClass(item)"
-        >
-          {{ item.count }}
-        </span>
-        <span
-          class="w-full text-[0.6875rem] leading-[0.875rem] tracking-tight text-center line-clamp-2"
-          :class="isActive(item) ? 'font-semibold' : 'font-medium'"
-        >
-          {{ item.name }}
-        </span>
-      </template>
+      <Icon
+        :icon="TAB_ICONS[item.key] || 'i-lucide-list'"
+        class="flex-shrink-0 size-4"
+        :class="toneClass(item)"
+      />
       <span
-        class="absolute bottom-0 h-0.5 rounded-full transition-colors duration-150"
-        :class="[
-          isInline ? 'inset-x-2' : 'inset-x-3',
+        v-if="showsLabel(item)"
+        class="text-sm truncate"
+        :class="isActive(item) ? 'font-semibold' : 'font-medium'"
+      >
+        {{ item.name }}
+      </span>
+      <span
+        class="text-xs font-semibold tabular-nums"
+        :class="countClass(item)"
+      >
+        {{ formatCount(item.count) }}
+      </span>
+      <span
+        class="absolute bottom-0 inset-x-2 h-0.5 rounded-full transition-colors duration-150"
+        :class="
           isActive(item)
             ? 'bg-n-brand'
-            : 'bg-transparent group-hover:bg-n-slate-6',
-        ]"
+            : 'bg-transparent group-hover:bg-n-slate-6'
+        "
       />
     </button>
   </div>
