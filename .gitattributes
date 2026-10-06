@@ -1,0 +1,17 @@
+# Keep LF everywhere so images built from a Windows checkout run their shell
+# scripts and binstubs (a CRLF shebang makes the container entrypoint fail).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp3 binary
+*.wav binary
+*.pdf binary
+*.mmdb binary
