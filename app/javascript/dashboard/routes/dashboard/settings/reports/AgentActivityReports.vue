@@ -3,9 +3,11 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import subDays from 'date-fns/subDays';
+import addDays from 'date-fns/addDays';
 import format from 'date-fns/format';
 import fromUnixTime from 'date-fns/fromUnixTime';
-import { formatTime } from '@chatwoot/utils';
+import differenceInCalendarDays from 'date-fns/differenceInCalendarDays';
+import { BarChart, HeatmapChart } from '@chatwoot/viz';
 import { getUnixStartOfDay, getUnixEndOfDay } from 'helpers/DateHelper';
 import { useMapGetter, useStore } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
@@ -21,10 +23,29 @@ import ReportHeader from './components/ReportHeader.vue';
 import WootDatePicker from 'dashboard/components/ui/DatePicker/DatePicker.vue';
 import Avatar from 'dashboard/components-next/avatar/Avatar.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
-import Icon from 'dashboard/components-next/icon/Icon.vue';
-import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
+import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
+import ActivityTable from './components/agentInsights/ActivityTable.vue';
+import AgentPicker from './components/agentInsights/AgentPicker.vue';
+import ChartLegend from './components/agentInsights/ChartLegend.vue';
+import InsightPanel from './components/agentInsights/InsightPanel.vue';
+import MetricStrip from './components/agentInsights/MetricStrip.vue';
+import PresenceTimeline from './components/agentInsights/PresenceTimeline.vue';
+import { presenceCoverage } from './components/agentInsights/presenceCoverage';
+import {
+  BAR_CHART_CLASS,
+  COLORS,
+  COVERAGE_COLORS,
+  HEATMAP_CLASS,
+  HEATMAP_COLORS,
+  HEATMAP_QUANTILES,
+  STATUS_DOT_CLASSES,
+  formatAgents,
+  formatCount,
+  formatHours,
+  toHours,
+} from './components/agentInsights/chartTheme';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
@@ -37,10 +58,23 @@ const selectedAgentId = ref('');
 const rows = ref([]);
 const isLoading = ref(false);
 const isDownloading = ref(false);
-const expandedIds = ref([]);
+const selectedDay = ref('');
 
 const from = computed(() => getUnixStartOfDay(customDateRange.value[0]));
 const to = computed(() => getUnixEndOfDay(customDateRange.value[1]));
+const intlLocale = computed(() => locale.value.replace('_', '-'));
+
+const TAB_KEYS = ['overview', 'timeline', 'coverage', 'details'];
+const tabs = computed(() =>
+  TAB_KEYS.map(key => ({
+    value: key,
+    label: t(`AGENT_ACTIVITY_REPORTS.TABS.${key.toUpperCase()}`),
+  }))
+);
+const activeTab = computed(() => {
+  const index = TAB_KEYS.indexOf(route.query.tab);
+  return index === -1 ? 0 : index;
+});
 
 const requestParams = () => ({
   since: from.value,
@@ -48,50 +82,22 @@ const requestParams = () => ({
   userId: selectedAgentId.value || undefined,
 });
 
-const STATUS_CLASSES = {
-  online: 'bg-n-teal-9',
-  busy: 'bg-n-amber-9',
-  offline: 'bg-n-slate-9',
-};
-
-const statusLabel = status =>
-  t(`AGENT_ACTIVITY_REPORTS.STATUS.${status || 'offline'}`);
-
-const duration = seconds => (seconds ? formatTime(seconds) : '--');
-const dateTime = unix =>
-  unix ? format(fromUnixTime(unix), 'dd/MM HH:mm') : '--';
-const count = value => (value ? value.toLocaleString() : '--');
-
-const totals = computed(() => ({
-  online: rows.value.reduce((sum, row) => sum + row.online_seconds, 0),
-  busy: rows.value.reduce((sum, row) => sum + row.busy_seconds, 0),
-  sessions: rows.value.reduce((sum, row) => sum + row.sessions_count, 0),
-  agentsOnline: rows.value.filter(row => row.current_status !== 'offline')
-    .length,
-}));
-
-const isExpanded = id => expandedIds.value.includes(id);
-const toggleRow = id => {
-  expandedIds.value = isExpanded(id)
-    ? expandedIds.value.filter(item => item !== id)
-    : [...expandedIds.value, id];
-};
-
-const segmentEnd = segment =>
-  segment.to >= to.value
-    ? t('AGENT_ACTIVITY_REPORTS.DETAIL.NOW')
-    : dateTime(segment.to);
-
-const updateURLParams = () => {
+const updateURLParams = (tab = route.query.tab) => {
   const params = generateReportURLParams({
     from: from.value,
     to: to.value,
     range: selectedDateRange.value,
   });
   router.replace({
-    query: { ...params, agent: selectedAgentId.value || undefined },
+    query: {
+      ...params,
+      agent: selectedAgentId.value || undefined,
+      tab: tab && tab !== 'overview' ? tab : undefined,
+    },
   });
 };
+
+const selectTab = tab => updateURLParams(tab.value);
 
 const fetchReport = async () => {
   isLoading.value = true;
@@ -104,6 +110,11 @@ const fetchReport = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const selectAgent = id => {
+  selectedAgentId.value = id ? String(id) : '';
+  fetchReport();
 };
 
 const onDateRangeChange = value => {
@@ -127,6 +138,201 @@ const downloadReport = async () => {
     isDownloading.value = false;
   }
 };
+
+const sum = key => rows.value.reduce((total, row) => total + row[key], 0);
+
+const metrics = computed(() => [
+  {
+    key: 'ONLINE',
+    label: t('AGENT_ACTIVITY_REPORTS.TOTALS.ONLINE'),
+    value: formatHours(toHours(sum('online_seconds'))),
+  },
+  {
+    key: 'BUSY',
+    label: t('AGENT_ACTIVITY_REPORTS.TOTALS.BUSY'),
+    value: formatHours(toHours(sum('busy_seconds'))),
+  },
+  {
+    key: 'SESSIONS',
+    label: t('AGENT_ACTIVITY_REPORTS.TOTALS.SESSIONS'),
+    value: formatCount(sum('sessions_count')),
+  },
+  {
+    key: 'AGENTS_ONLINE',
+    label: t('AGENT_ACTIVITY_REPORTS.TOTALS.AGENTS_ONLINE'),
+    value: formatCount(
+      rows.value.filter(row => row.current_status !== 'offline').length
+    ),
+  },
+]);
+
+const firstName = name => (name || '').split(' ')[0];
+
+const activeRows = computed(() =>
+  rows.value.filter(row => row.online_seconds || row.busy_seconds)
+);
+
+// "since 14:13" for today, "since 06/10 14:13" for older changes
+// Only meaningful when the period reaches the present and the status changed inside it
+const sinceLabel = row => {
+  const last = row.timeline[row.timeline.length - 1];
+  const reachesNow = to.value >= Date.now() / 1000;
+  if (!reachesNow || !last || last.status !== row.current_status) return '';
+  if (last.from <= from.value) return '';
+  const changedAt = fromUnixTime(last.from);
+  const sameDay =
+    format(changedAt, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+  return t('AGENT_ACTIVITY_REPORTS.NOW.SINCE', {
+    time: format(changedAt, sameDay ? 'HH:mm' : 'dd/MM HH:mm'),
+  });
+};
+
+// Agents sorted so those connected now come first
+const statusRows = computed(() => {
+  const rank = { online: 0, busy: 1, offline: 2 };
+  return [...rows.value].sort(
+    (a, b) =>
+      (rank[a.current_status] ?? 2) - (rank[b.current_status] ?? 2) ||
+      a.name.localeCompare(b.name)
+  );
+});
+
+const hoursChart = computed(() => {
+  const sorted = [...activeRows.value].sort(
+    (a, b) =>
+      b.online_seconds + b.busy_seconds - (a.online_seconds + a.busy_seconds)
+  );
+  return {
+    categories: sorted.map(row => firstName(row.name)),
+    series: [
+      {
+        id: 'online',
+        label: t('AGENT_ACTIVITY_REPORTS.STATUS.online'),
+        color: COLORS.online,
+        data: sorted.map(row => toHours(row.online_seconds)),
+      },
+      {
+        id: 'busy',
+        label: t('AGENT_ACTIVITY_REPORTS.STATUS.busy'),
+        color: COLORS.busy,
+        data: sorted.map(row => toHours(row.busy_seconds)),
+      },
+    ],
+  };
+});
+
+// Days of the selected range, oldest first, never past today
+const rangeDays = computed(() => {
+  const start = customDateRange.value[0];
+  const end = new Date(
+    Math.min(customDateRange.value[1].getTime(), Date.now())
+  );
+  const total = Math.max(differenceInCalendarDays(end, start), 0);
+  return Array.from({ length: total + 1 }, (_, index) =>
+    format(addDays(start, index), 'yyyy-MM-dd')
+  );
+});
+
+const dayHeatmap = computed(() => {
+  const columns = rangeDays.value.map(date => ({
+    id: date,
+    label: format(new Date(`${date}T00:00:00`), 'dd/MM'),
+  }));
+  return {
+    columns,
+    rows: activeRows.value.map(row => {
+      const byDate = Object.fromEntries(
+        row.daily.map(day => [day.date, day.online_seconds + day.busy_seconds])
+      );
+      return {
+        id: row.id,
+        label: row.name,
+        data: columns.map(({ id }) =>
+          byDate[id] ? { value: toHours(byDate[id]) } : null
+        ),
+      };
+    }),
+  };
+});
+
+const coverage = computed(() =>
+  presenceCoverage(rows.value, rangeDays.value.length)
+);
+
+const coverageChart = computed(() => ({
+  categories: coverage.value.byHour.map((_, hour) =>
+    String(hour).padStart(2, '0')
+  ),
+  series: [
+    {
+      id: 'coverage',
+      label: t('AGENT_ACTIVITY_REPORTS.COVERAGE.SERIES'),
+      color: COLORS.online,
+      data: coverage.value.byHour,
+    },
+  ],
+}));
+
+const hasCoverage = computed(() => coverage.value.byHour.some(Boolean));
+
+const coverageHeatmap = computed(() => {
+  const columns = Array.from({ length: 24 }, (_, hour) => ({
+    id: hour,
+    label: String(hour).padStart(2, '0'),
+  }));
+  // Monday first; 2023-01-01 was a Sunday
+  return {
+    columns,
+    rows: [1, 2, 3, 4, 5, 6, 0].map(weekday => ({
+      id: weekday,
+      label: new Intl.DateTimeFormat(intlLocale.value, {
+        weekday: 'short',
+      }).format(new Date(2023, 0, 1 + weekday)),
+      data: columns.map(({ id }) => {
+        const value = coverage.value.byWeekdayHour[weekday][id];
+        return value ? { value } : null;
+      }),
+    })),
+  };
+});
+
+const timelineDay = computed(() =>
+  rangeDays.value.includes(selectedDay.value)
+    ? selectedDay.value
+    : rangeDays.value[rangeDays.value.length - 1]
+);
+const dayIndex = computed(() => rangeDays.value.indexOf(timelineDay.value));
+const moveDay = step => {
+  selectedDay.value = rangeDays.value[dayIndex.value + step];
+};
+
+const timelineRows = computed(() => {
+  if (!timelineDay.value) return [];
+  const start = new Date(`${timelineDay.value}T00:00:00`).getTime() / 1000;
+  return rows.value.map(row => {
+    const day = row.daily.find(item => item.date === timelineDay.value);
+    return {
+      id: row.id,
+      label: row.name,
+      sublabel: formatHours(
+        toHours((day?.online_seconds || 0) + (day?.busy_seconds || 0))
+      ),
+      start,
+      end: start + 86400,
+      segments: row.timeline,
+    };
+  });
+});
+
+const timelineDayLabel = computed(() =>
+  timelineDay.value
+    ? new Intl.DateTimeFormat(intlLocale.value, {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+      }).format(new Date(`${timelineDay.value}T00:00:00`))
+    : ''
+);
 
 onMounted(() => {
   const urlParams = parseReportURLParams(route.query);
@@ -166,274 +372,215 @@ onMounted(() => {
       v-model:range-type="selectedDateRange"
       @date-range-changed="onDateRangeChange"
     />
-    <select
-      v-model="selectedAgentId"
-      class="!mb-0 w-full md:w-64 text-sm"
-      @change="fetchReport"
-    >
-      <option value="">{{ $t('AGENT_ACTIVITY_REPORTS.ALL_AGENTS') }}</option>
-      <option v-for="agent in agents" :key="agent.id" :value="String(agent.id)">
-        {{ agent.name }}
-      </option>
-    </select>
+    <AgentPicker
+      :agents="agents"
+      :model-value="selectedAgentId"
+      @update:model-value="selectAgent"
+    />
   </div>
 
-  <div class="grid grid-cols-2 gap-3 mt-5 md:grid-cols-4">
-    <div
-      v-for="(value, key) in {
-        ONLINE: duration(totals.online),
-        BUSY: duration(totals.busy),
-        SESSIONS: totals.sessions,
-        AGENTS_ONLINE: totals.agentsOnline,
-      }"
-      :key="key"
-      class="flex flex-col gap-1 p-4 rounded-xl outline outline-1 outline-n-weak bg-n-solid-1"
-    >
-      <span class="text-xs text-n-slate-11">
-        {{ $t(`AGENT_ACTIVITY_REPORTS.TOTALS.${key}`) }}
-      </span>
-      <span class="text-xl font-medium text-n-slate-12">{{ value }}</span>
-    </div>
-  </div>
+  <div class="flex flex-col gap-5 mt-5">
+    <MetricStrip :items="metrics" :is-loading="isLoading && !rows.length" />
 
-  <div
-    class="mt-5 overflow-x-auto rounded-xl outline outline-1 outline-n-weak bg-n-solid-1"
-  >
-    <div
-      v-if="isLoading"
-      class="flex items-center justify-center gap-2 py-10 text-sm text-n-slate-11"
-    >
-      <Spinner />
-      {{ $t('AGENT_ACTIVITY_REPORTS.LOADING') }}
-    </div>
+    <TabBar
+      :tabs="tabs"
+      :initial-active-tab="activeTab"
+      @tab-changed="selectTab"
+    />
+
     <p
-      v-else-if="!rows.length"
-      class="py-10 text-sm text-center text-n-slate-11"
+      v-if="!isLoading && !rows.length"
+      class="py-10 text-sm text-center rounded-xl text-n-slate-11 outline outline-1 outline-n-container bg-n-solid-2"
     >
       {{ $t('AGENT_ACTIVITY_REPORTS.NO_DATA') }}
     </p>
-    <table v-else class="w-full text-sm text-left whitespace-nowrap">
-      <thead class="text-xs text-n-slate-11 bg-n-slate-2">
-        <tr>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.AGENT') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.CURRENT_STATUS') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.ONLINE_TIME') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.BUSY_TIME') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.SESSIONS') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.FIRST_ONLINE') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.LAST_OFFLINE') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.CONVERSATIONS') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.RESOLVED') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.AVG_FIRST_RESPONSE') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.AVG_REPLY_TIME') }}
-          </th>
-          <th class="px-4 py-3 font-medium">
-            {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.MESSAGES_SENT') }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <template v-for="row in rows" :key="row.id">
-          <tr
-            class="border-t cursor-pointer border-n-weak hover:bg-n-alpha-1"
-            @click="toggleRow(row.id)"
+
+    <template v-else-if="activeTab === 0">
+      <InsightPanel
+        :title="$t('AGENT_ACTIVITY_REPORTS.NOW.TITLE')"
+        :description="$t('AGENT_ACTIVITY_REPORTS.NOW.DESCRIPTION')"
+      >
+        <ul
+          class="grid grid-cols-1 gap-2 p-0 m-0 list-none sm:grid-cols-2 xl:grid-cols-3"
+        >
+          <li
+            v-for="row in statusRows"
+            :key="row.id"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-n-alpha-1"
           >
-            <td class="px-4 py-2">
-              <div class="flex items-center gap-2">
-                <Icon
-                  :icon="
-                    isExpanded(row.id)
-                      ? 'i-lucide-chevron-down'
-                      : 'i-lucide-chevron-right'
-                  "
-                  class="size-4 text-n-slate-10"
-                />
-                <Avatar
-                  :src="row.thumbnail"
-                  :name="row.name"
-                  :status="row.current_status"
-                  :size="28"
-                  rounded-full
-                />
-                <div class="flex flex-col min-w-0">
-                  <span class="font-medium text-n-slate-12">{{
-                    row.name
-                  }}</span>
-                  <span class="text-xs text-n-slate-11">{{ row.email }}</span>
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-2">
-              <span class="inline-flex items-center gap-1.5">
-                <span
-                  class="size-2 rounded-full"
-                  :class="
-                    STATUS_CLASSES[row.current_status] || STATUS_CLASSES.offline
-                  "
-                />
-                {{ statusLabel(row.current_status) }}
+            <Avatar
+              :src="row.thumbnail"
+              :name="row.name"
+              :size="32"
+              rounded-full
+            />
+            <div class="flex flex-col flex-1 min-w-0">
+              <span class="text-sm truncate text-n-slate-12">
+                {{ row.name }}
               </span>
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ duration(row.online_seconds) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ duration(row.busy_seconds) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ count(row.sessions_count) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ dateTime(row.first_online_at) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ dateTime(row.last_offline_at) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ count(row.conversations_count) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ count(row.resolved_conversations_count) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ duration(row.avg_first_response_time) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ duration(row.avg_reply_time) }}
-            </td>
-            <td class="px-4 py-2 text-n-slate-12">
-              {{ count(row.outgoing_messages_count) }}
-            </td>
-          </tr>
-          <tr
-            v-if="isExpanded(row.id)"
-            class="border-t border-n-weak bg-n-slate-1"
+              <span
+                class="inline-flex items-center gap-1.5 text-xs text-n-slate-11"
+              >
+                <span
+                  class="rounded-full size-2"
+                  :class="
+                    STATUS_DOT_CLASSES[row.current_status] ||
+                    STATUS_DOT_CLASSES.offline
+                  "
+                />
+                {{
+                  $t(
+                    `AGENT_ACTIVITY_REPORTS.STATUS.${row.current_status || 'offline'}`
+                  )
+                }}
+                <span v-if="sinceLabel(row)" class="text-n-slate-10">
+                  {{ sinceLabel(row) }}
+                </span>
+              </span>
+            </div>
+          </li>
+        </ul>
+      </InsightPanel>
+
+      <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <InsightPanel
+          :title="$t('AGENT_ACTIVITY_REPORTS.CHARTS.HOURS_BY_AGENT')"
+          :description="$t('AGENT_ACTIVITY_REPORTS.CHARTS.HOURS_BY_AGENT_DESC')"
+        >
+          <template v-if="activeRows.length">
+            <ChartLegend :series="hoursChart.series" />
+            <BarChart
+              :data="hoursChart"
+              stacked
+              :height="260"
+              :max-bar-width="28"
+              :format-value="formatHours"
+              :aria-label="$t('AGENT_ACTIVITY_REPORTS.CHARTS.HOURS_BY_AGENT')"
+              :class="BAR_CHART_CLASS"
+            />
+          </template>
+          <p
+            v-else
+            class="grid text-sm h-64 place-content-center text-n-slate-11"
           >
-            <td colspan="12" class="px-4 py-3">
-              <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div class="lg:col-span-2">
-                  <h4
-                    class="mb-2 text-xs font-medium uppercase text-n-slate-11"
-                  >
-                    {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.TIMELINE') }}
-                  </h4>
-                  <p
-                    v-if="!row.timeline.length"
-                    class="text-xs text-n-slate-11"
-                  >
-                    {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.EMPTY') }}
-                  </p>
-                  <div v-else class="overflow-y-auto max-h-80">
-                    <table class="w-full text-xs">
-                      <thead class="text-n-slate-11">
-                        <tr>
-                          <th class="py-1 pr-4 font-medium text-left">
-                            {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.STATUS') }}
-                          </th>
-                          <th class="py-1 pr-4 font-medium text-left">
-                            {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.FROM') }}
-                          </th>
-                          <th class="py-1 pr-4 font-medium text-left">
-                            {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.TO') }}
-                          </th>
-                          <th class="py-1 pr-4 font-medium text-left">
-                            {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.DURATION') }}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr
-                          v-for="segment in row.timeline"
-                          :key="segment.from"
-                          class="border-t border-n-weak"
-                        >
-                          <td class="py-1 pr-4">
-                            <span class="inline-flex items-center gap-1.5">
-                              <span
-                                class="size-2 rounded-full"
-                                :class="STATUS_CLASSES[segment.status]"
-                              />
-                              {{ statusLabel(segment.status) }}
-                            </span>
-                          </td>
-                          <td class="py-1 pr-4">
-                            {{ dateTime(segment.from) }}
-                          </td>
-                          <td class="py-1 pr-4">{{ segmentEnd(segment) }}</td>
-                          <td class="py-1 pr-4">
-                            {{ duration(segment.duration) }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div>
-                  <h4
-                    class="mb-2 text-xs font-medium uppercase text-n-slate-11"
-                  >
-                    {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.DAILY') }}
-                  </h4>
-                  <p v-if="!row.daily.length" class="text-xs text-n-slate-11">
-                    {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.EMPTY') }}
-                  </p>
-                  <table v-else class="w-full text-xs">
-                    <thead class="text-n-slate-11">
-                      <tr>
-                        <th class="py-1 pr-4 font-medium text-left">
-                          {{ $t('AGENT_ACTIVITY_REPORTS.DETAIL.DATE') }}
-                        </th>
-                        <th class="py-1 pr-4 font-medium text-left">
-                          {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.ONLINE_TIME') }}
-                        </th>
-                        <th class="py-1 pr-4 font-medium text-left">
-                          {{ $t('AGENT_ACTIVITY_REPORTS.TABLE.BUSY_TIME') }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="day in row.daily"
-                        :key="day.date"
-                        class="border-t border-n-weak"
-                      >
-                        <td class="py-1 pr-4">{{ day.date }}</td>
-                        <td class="py-1 pr-4">
-                          {{ duration(day.online_seconds) }}
-                        </td>
-                        <td class="py-1 pr-4">
-                          {{ duration(day.busy_seconds) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+            {{ $t('AGENT_ACTIVITY_REPORTS.NO_DATA') }}
+          </p>
+        </InsightPanel>
+        <InsightPanel
+          :title="$t('AGENT_ACTIVITY_REPORTS.CHARTS.HOURS_BY_DAY')"
+          :description="$t('AGENT_ACTIVITY_REPORTS.CHARTS.HOURS_BY_DAY_DESC')"
+        >
+          <div v-if="activeRows.length" class="overflow-x-auto">
+            <HeatmapChart
+              :data="dayHeatmap"
+              :colors="HEATMAP_COLORS"
+              :quantiles="HEATMAP_QUANTILES"
+              :cell-min-width="34"
+              :cell-height="28"
+              :gap="4"
+              :row-label-width="96"
+              :format-value="formatHours"
+              zero-color="rgb(var(--solid-2))"
+              :aria-label="$t('AGENT_ACTIVITY_REPORTS.CHARTS.HOURS_BY_DAY')"
+              :class="HEATMAP_CLASS"
+            />
+          </div>
+          <p
+            v-else
+            class="grid text-sm h-64 place-content-center text-n-slate-11"
+          >
+            {{ $t('AGENT_ACTIVITY_REPORTS.NO_DATA') }}
+          </p>
+        </InsightPanel>
+      </div>
+    </template>
+
+    <InsightPanel
+      v-else-if="activeTab === 1"
+      :title="timelineDayLabel"
+      :description="$t('AGENT_ACTIVITY_REPORTS.CHARTS.DAY_TIMELINE_DESC')"
+    >
+      <template #actions>
+        <div class="flex items-center gap-1">
+          <Button
+            xs
+            slate
+            ghost
+            icon="i-lucide-chevron-left"
+            :disabled="dayIndex <= 0"
+            :aria-label="$t('AGENT_ACTIVITY_REPORTS.CHARTS.PREVIOUS_DAY')"
+            @click="moveDay(-1)"
+          />
+          <Button
+            xs
+            slate
+            ghost
+            icon="i-lucide-chevron-right"
+            :disabled="dayIndex >= rangeDays.length - 1"
+            :aria-label="$t('AGENT_ACTIVITY_REPORTS.CHARTS.NEXT_DAY')"
+            @click="moveDay(1)"
+          />
+        </div>
+      </template>
+      <PresenceTimeline :rows="timelineRows" />
+    </InsightPanel>
+
+    <template v-else-if="activeTab === 2">
+      <InsightPanel
+        :title="$t('AGENT_ACTIVITY_REPORTS.COVERAGE.BY_HOUR')"
+        :description="$t('AGENT_ACTIVITY_REPORTS.COVERAGE.BY_HOUR_DESC')"
+      >
+        <BarChart
+          v-if="hasCoverage"
+          :data="coverageChart"
+          :height="240"
+          :max-bar-width="22"
+          :bar-gap="3"
+          :format-value="formatAgents"
+          :aria-label="$t('AGENT_ACTIVITY_REPORTS.COVERAGE.BY_HOUR')"
+          :class="BAR_CHART_CLASS"
+        />
+        <p
+          v-else
+          class="grid text-sm h-60 place-content-center text-n-slate-11"
+        >
+          {{ $t('AGENT_ACTIVITY_REPORTS.NO_DATA') }}
+        </p>
+      </InsightPanel>
+      <InsightPanel
+        :title="$t('AGENT_ACTIVITY_REPORTS.COVERAGE.BY_WEEKDAY')"
+        :description="$t('AGENT_ACTIVITY_REPORTS.COVERAGE.BY_WEEKDAY_DESC')"
+      >
+        <div v-if="hasCoverage" class="overflow-x-auto">
+          <HeatmapChart
+            class="min-w-[44rem]"
+            :data="coverageHeatmap"
+            :colors="COVERAGE_COLORS"
+            :quantiles="HEATMAP_QUANTILES"
+            :cell-min-width="22"
+            :cell-height="26"
+            :gap="4"
+            :row-label-width="64"
+            :format-value="formatAgents"
+            zero-color="rgb(var(--solid-2))"
+            :aria-label="$t('AGENT_ACTIVITY_REPORTS.COVERAGE.BY_WEEKDAY')"
+            :class="HEATMAP_CLASS"
+          />
+        </div>
+        <p
+          v-else
+          class="grid text-sm h-60 place-content-center text-n-slate-11"
+        >
+          {{ $t('AGENT_ACTIVITY_REPORTS.NO_DATA') }}
+        </p>
+      </InsightPanel>
+    </template>
+
+    <ActivityTable
+      v-else
+      :rows="rows"
+      :is-loading="isLoading"
+      :range-end="to"
+    />
   </div>
 </template>

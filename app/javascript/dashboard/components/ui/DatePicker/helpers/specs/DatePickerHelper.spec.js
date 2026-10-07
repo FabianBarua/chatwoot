@@ -12,6 +12,8 @@ import {
   isHoveringNextDayInRange,
   moveCalendarDate,
   chunk,
+  getRangeAtOffset,
+  isNavigableRange,
 } from '../DatePickerHelper';
 
 describe('Date formatting functions', () => {
@@ -305,5 +307,30 @@ describe('getActiveDateRange', () => {
     const range = getActiveDateRange('unknown', new Date());
     expect(range.start).toEqual(new Date(currentDate));
     expect(range.end).toEqual(new Date(currentDate));
+  });
+});
+
+describe('today and yesterday ranges', () => {
+  const now = new Date(2026, 9, 6, 15, 30);
+
+  it('covers the whole current day for today', () => {
+    const { start, end } = getActiveDateRange('today', now);
+    expect(start).toEqual(new Date(2026, 9, 6, 0, 0, 0, 0));
+    expect(end).toEqual(new Date(2026, 9, 6, 23, 59, 59, 999));
+  });
+
+  it('covers the whole previous day for yesterday', () => {
+    const { start, end } = getActiveDateRange('yesterday', now);
+    expect(start).toEqual(new Date(2026, 9, 5, 0, 0, 0, 0));
+    expect(end).toEqual(new Date(2026, 9, 5, 23, 59, 59, 999));
+  });
+
+  it('lets today be navigated one day at a time', () => {
+    expect(isNavigableRange('today')).toBe(true);
+    expect(isNavigableRange('yesterday')).toBe(false);
+
+    const { start, end } = getRangeAtOffset('today', -2, now);
+    expect(start).toEqual(new Date(2026, 9, 4, 0, 0, 0, 0));
+    expect(end).toEqual(new Date(2026, 9, 4, 23, 59, 59, 999));
   });
 });

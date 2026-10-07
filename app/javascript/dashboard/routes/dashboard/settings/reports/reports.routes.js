@@ -4,13 +4,12 @@ import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import ReportsWrapper from './components/ReportsWrapper.vue';
 import Index from './Index.vue';
 
-import AgentReportsIndex from './AgentReportsIndex.vue';
+import AgentInsightsReports from './AgentInsightsReports.vue';
 import AgentActivityReports from './AgentActivityReports.vue';
 import InboxReportsIndex from './InboxReportsIndex.vue';
 import TeamReportsIndex from './TeamReportsIndex.vue';
 import LabelReportsIndex from './LabelReportsIndex.vue';
 
-import AgentReportsShow from './AgentReportsShow.vue';
 import InboxReportsShow from './InboxReportsShow.vue';
 import TeamReportsShow from './TeamReportsShow.vue';
 import LabelReportsShow from './LabelReportsShow.vue';
@@ -62,13 +61,13 @@ const revisedReportRoutes = [
     path: 'agents_overview',
     name: 'agent_reports_index',
     meta,
-    component: AgentReportsIndex,
+    component: AgentInsightsReports,
   },
   {
     path: 'agents/:id',
     name: 'agent_reports_show',
     meta,
-    component: AgentReportsShow,
+    component: AgentInsightsReports,
   },
   {
     path: 'agents_activity',

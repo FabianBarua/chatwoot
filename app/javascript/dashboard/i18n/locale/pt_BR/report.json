@@ -224,7 +224,7 @@
   },
   "AGENT_ACTIVITY_REPORTS": {
     "HEADER": "Atividade dos agentes",
-    "DESCRIPTION": "Acompanhe quando cada agente ficou online, ocupado ou offline, quanto tempo permaneceu conectado e o que atendeu no período. Expanda uma linha para ver cada mudança de status.",
+    "DESCRIPTION": "Veja quem está conectado agora, quando cada agente trabalhou e se todas as horas do dia estão cobertas. Use as abas para mudar de visão.",
     "DOWNLOAD": "Baixar CSV",
     "ALL_AGENTS": "Todos os agentes",
     "LOADING": "Carregando atividade dos agentes...",
@@ -264,6 +264,34 @@
       "BUSY": "Total ocupado",
       "SESSIONS": "Sessões",
       "AGENTS_ONLINE": "Agentes online agora"
+    },
+    "CHARTS": {
+      "HOURS_BY_AGENT": "Horas conectado por agente",
+      "HOURS_BY_AGENT_DESC": "Tempo online e ocupado no período.",
+      "HOURS_BY_DAY": "Horas conectado por dia",
+      "HOURS_BY_DAY_DESC": "Cada célula é o tempo online ou ocupado de um agente num dia.",
+      "DAY_TIMELINE": "Linha do tempo do dia",
+      "DAY_TIMELINE_DESC": "Quem esteve conectado em cada hora do dia. Use as setas para mudar o dia.",
+      "PREVIOUS_DAY": "Dia anterior",
+      "NEXT_DAY": "Próximo dia"
+    },
+    "TABS": {
+      "OVERVIEW": "Visão geral",
+      "TIMELINE": "Linha do dia",
+      "COVERAGE": "Cobertura",
+      "DETAILS": "Detalhes"
+    },
+    "NOW": {
+      "TITLE": "Agora",
+      "DESCRIPTION": "Status atual de cada agente e desde quando.",
+      "SINCE": "desde {time}"
+    },
+    "COVERAGE": {
+      "SERIES": "Agentes conectados",
+      "BY_HOUR": "Agentes conectados por hora",
+      "BY_HOUR_DESC": "Média de agentes online ou ocupados em cada hora do dia. Barras baixas são lacunas de cobertura.",
+      "BY_WEEKDAY": "Cobertura por dia da semana e hora",
+      "BY_WEEKDAY_DESC": "Média de agentes conectados. Mais escuro significa mais gente disponível."
     }
   },
   "LABEL_REPORTS": {
@@ -714,5 +742,114 @@
     "AVG_REPLY_TIME": "Tempo Médio de Espera do Cliente",
     "RESOLUTION_COUNT": "Contagem de Resolução",
     "CONVERSATIONS": "Nº de Conversas"
+  },
+  "AGENT_INSIGHTS": {
+    "HEADER": "Agentes",
+    "DESCRIPTION": "Escolha um agente para ver o desempenho dele com gráficos, ou compare toda a equipe. Cada número é comparado com o período anterior de mesma duração.",
+    "ALL_AGENTS": "Todos os agentes",
+    "SEARCH_AGENT": "Buscar agente",
+    "NO_AGENT_FOUND": "Nenhum agente encontrado",
+    "LOADING": "Carregando relatório...",
+    "EMPTY_CHART": "Sem dados neste período",
+    "NO_CSAT": "Sem avaliações neste período",
+    "VS_PREVIOUS": "Comparado com o período anterior",
+    "ROLES": {
+      "administrator": "Administrador",
+      "agent": "Agente"
+    },
+    "NOW": {
+      "OPEN": "Abertas agora",
+      "UNATTENDED": "A responder agora"
+    },
+    "KPI": {
+      "ATTENDED": "Conversas respondidas",
+      "RESOLVED": "Resolvidas",
+      "MESSAGES_SENT": "Mensagens enviadas",
+      "FIRST_RESPONSE": "Primeira resposta média",
+      "ONLINE_HOURS": "Horas conectado",
+      "CSAT": "CSAT médio",
+      "OPEN_NOW": "Abertas agora",
+      "UNATTENDED_NOW": "A responder agora"
+    },
+    "METRICS": {
+      "attended_conversations_count": "Conversas respondidas",
+      "resolved_conversations_count": "Resolvidas",
+      "resolution_rate": "Taxa de resolução",
+      "outgoing_messages_count": "Mensagens enviadas",
+      "avg_first_response_time": "Primeira resposta média",
+      "avg_reply_time": "Tempo de resposta médio",
+      "avg_resolution_time": "Tempo de resolução médio",
+      "presence_seconds": "Horas conectado",
+      "sessions_count": "Sessões",
+      "private_notes_count": "Notas privadas",
+      "csat_average": "CSAT médio",
+      "csat_count": "Respostas CSAT",
+      "avg_hours_per_day": "Média de horas por dia ativo",
+      "satisfaction_rate": "Satisfação"
+    },
+    "SERIES": {
+      "ATTENDED": "Respondidas",
+      "RESOLVED": "Resolvidas",
+      "MESSAGES": "Mensagens",
+      "FIRST_RESPONSE": "Primeira resposta",
+      "ASSIGNED": "Atribuídas"
+    },
+    "CHARTS": {
+      "CONVERSATIONS_BY_AGENT": "Conversas por agente",
+      "CONVERSATIONS_BY_AGENT_DESC": "Conversas que cada agente respondeu e resolveu no período.",
+      "HOURS_BY_AGENT": "Horas conectado por agente",
+      "HOURS_BY_AGENT_DESC": "Tempo online e ocupado no período.",
+      "CONVERSATIONS_PER_DAY": "Atribuídas, respondidas e resolvidas por dia",
+      "CONVERSATIONS_PER_DAY_DESC": "O que chegou ao agente a cada dia e o que ele fez com isso.",
+      "HOURS_PER_DAY": "Horas conectado por dia",
+      "HOURS_PER_DAY_DESC": "Tempo online e ocupado a cada dia.",
+      "MESSAGES_PER_DAY": "Mensagens enviadas por dia",
+      "MESSAGES_PER_DAY_DESC": "Respostas aos clientes, sem notas privadas.",
+      "FIRST_RESPONSE_PER_DAY": "Primeira resposta por dia",
+      "FIRST_RESPONSE_PER_DAY_DESC": "Tempo médio até a primeira resposta; quanto menor, melhor.",
+      "WHEN_WORKS": "Quando responde",
+      "WHEN_WORKS_DESC": "Mensagens enviadas por dia da semana e hora.",
+      "PRESENCE_TIMELINE": "Linha do tempo de status",
+      "PRESENCE_TIMELINE_DESC": "Tempo online e ocupado hora a hora, últimos {days} dias do período.",
+      "CSAT": "Satisfação do cliente",
+      "CSAT_DESC": "{rate}% das avaliações foram boas ou excelentes.",
+      "LABELS": "Principais etiquetas",
+      "LABELS_DESC": "Etiquetas das conversas que respondeu.",
+      "INBOXES": "Caixas de entrada",
+      "INBOXES_DESC": "De onde vieram as conversas que respondeu."
+    },
+    "RANKING": {
+      "TITLE": "Ranking de agentes",
+      "DESCRIPTION": "Clique numa coluna para ordenar e num agente para abrir o painel dele.",
+      "AGENT": "Agente",
+      "COLUMNS": {
+        "attended_conversations_count": "Respondidas",
+        "resolved_conversations_count": "Resolvidas",
+        "outgoing_messages_count": "Mensagens",
+        "avg_first_response_time": "1ª resposta",
+        "avg_reply_time": "T. resposta",
+        "online_seconds": "Conectado",
+        "csat_average": "CSAT",
+        "open_conversations": "Abertas / a responder"
+      }
+    },
+    "TABS": {
+      "SUMMARY": "Resumo",
+      "SCHEDULE": "Horários",
+      "QUALITY": "Qualidade"
+    },
+    "WORKLOAD": {
+      "TITLE": "Carga de trabalho",
+      "DESCRIPTION": "Conversas atribuídas no período e ainda ativas, e em que estado estão agora.",
+      "ASSIGNED": "Atribuídas",
+      "ATTENDED": "Respondidas",
+      "RESOLVED": "Resolvidas",
+      "OPEN": "Abertas",
+      "PENDING": "Pendentes",
+      "SNOOZED": "Adiadas",
+      "IN_ATTENTION": "Em atendimento agora",
+      "EMPTY": "Nenhuma conversa atribuída neste período",
+      "WAITING_NOTE": "{count} aguardando"
+    }
   }
 }

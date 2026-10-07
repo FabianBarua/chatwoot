@@ -31,7 +31,13 @@ export const calendarWeeks = [
 ];
 
 export const dateRanges = [
-  { label: 'DATE_PICKER.DATE_RANGE_OPTIONS.LAST_7_DAYS', value: 'last7days' },
+  { label: 'DATE_PICKER.DATE_RANGE_OPTIONS.TODAY', value: 'today' },
+  { label: 'DATE_PICKER.DATE_RANGE_OPTIONS.YESTERDAY', value: 'yesterday' },
+  {
+    label: 'DATE_PICKER.DATE_RANGE_OPTIONS.LAST_7_DAYS',
+    value: 'last7days',
+    separator: true,
+  },
   { label: 'DATE_PICKER.DATE_RANGE_OPTIONS.LAST_30_DAYS', value: 'last30days' },
   {
     label: 'DATE_PICKER.DATE_RANGE_OPTIONS.LAST_3_MONTHS',
@@ -60,6 +66,8 @@ export const dateRanges = [
 ];
 
 export const DATE_RANGE_TYPES = {
+  TODAY: 'today',
+  YESTERDAY: 'yesterday',
   LAST_7_DAYS: 'last7days',
   LAST_30_DAYS: 'last30days',
   LAST_3_MONTHS: 'last3months',
@@ -208,6 +216,14 @@ export const isHoveringNextDayInRange = (
 // Helper func to determine active date ranges based on user selection
 export const getActiveDateRange = (range, currentDate) => {
   const ranges = {
+    today: () => ({
+      start: startOfDay(currentDate),
+      end: endOfDay(currentDate),
+    }),
+    yesterday: () => ({
+      start: startOfDay(subDays(currentDate, 1)),
+      end: endOfDay(subDays(currentDate, 1)),
+    }),
     last7days: () => ({
       start: startOfDay(subDays(currentDate, 6)),
       end: endOfDay(currentDate),
@@ -245,6 +261,7 @@ export const getActiveDateRange = (range, currentDate) => {
 };
 
 export const isNavigableRange = rangeType =>
+  rangeType === DATE_RANGE_TYPES.TODAY ||
   rangeType === DATE_RANGE_TYPES.MONTH_TO_DATE ||
   rangeType === DATE_RANGE_TYPES.THIS_WEEK;
 
@@ -262,6 +279,12 @@ const getWeekRangeAtOffset = (offset, currentDate) => {
     start: startOfDay(startOfWeek(targetWeek, { weekStartsOn: WEEK_START })),
     end: endOfDay(endOfWeek(targetWeek, { weekStartsOn: WEEK_START })),
   };
+};
+
+// "Today" moves one day at a time: offset -1 is yesterday, -2 the day before
+const getDayRangeAtOffset = (offset, currentDate) => {
+  const day = addDays(currentDate, offset);
+  return { start: startOfDay(day), end: endOfDay(day) };
 };
 
 const getMonthRangeAtOffset = (offset, currentDate) => {
@@ -283,6 +306,9 @@ export const getRangeAtOffset = (
   offset,
   currentDate = new Date()
 ) => {
+  if (rangeType === DATE_RANGE_TYPES.TODAY) {
+    return getDayRangeAtOffset(offset, currentDate);
+  }
   if (rangeType === DATE_RANGE_TYPES.THIS_WEEK) {
     return getWeekRangeAtOffset(offset, currentDate);
   }

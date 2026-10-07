@@ -19,6 +19,7 @@ import {
   subMonths,
   addMonths,
   isSameMonth,
+  differenceInCalendarDays,
   differenceInCalendarMonths,
   differenceInCalendarWeeks,
   setMonth,
@@ -100,6 +101,18 @@ const canNavigateNext = computed(() => {
 
 const navigationLabel = computed(() => {
   const range = selectedRange.value;
+  if (range === DATE_RANGE_TYPES.TODAY) {
+    const daysAgo = differenceInCalendarDays(
+      currentDate.value,
+      selectedStartDate.value
+    );
+    if (daysAgo <= 0) return null;
+    if (daysAgo === 1) return t('DATE_PICKER.DATE_RANGE_OPTIONS.YESTERDAY');
+    const weekday = new Intl.DateTimeFormat(navigator.language, {
+      weekday: 'long',
+    }).format(selectedStartDate.value);
+    return weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  }
   if (range === DATE_RANGE_TYPES.MONTH_TO_DATE) {
     return new Intl.DateTimeFormat(navigator.language, {
       month: 'long',
@@ -160,7 +173,12 @@ watch(
           selectedRange.value,
           currentDate.value
         );
-        if (selectedRange.value === DATE_RANGE_TYPES.THIS_WEEK) {
+        if (selectedRange.value === DATE_RANGE_TYPES.TODAY) {
+          monthOffset.value = differenceInCalendarDays(
+            newDateRange[0],
+            current.start
+          );
+        } else if (selectedRange.value === DATE_RANGE_TYPES.THIS_WEEK) {
           monthOffset.value = differenceInCalendarWeeks(
             newDateRange[0],
             current.start,

@@ -11,6 +11,8 @@
     },
     "DATE_RANGE_OPTIONS": {
       "TITLE": "Intervalo de datas",
+      "TODAY": "Hoje",
+      "YESTERDAY": "Ontem",
       "LAST_7_DAYS": "Últimos 7 Dias",
       "LAST_30_DAYS": "Últimos 30 Dias",
       "LAST_3_MONTHS": "Últimos 3 meses",

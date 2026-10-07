@@ -11,6 +11,8 @@
     },
     "DATE_RANGE_OPTIONS": {
       "TITLE": "Rango de fecha",
+      "TODAY": "Hoy",
+      "YESTERDAY": "Ayer",
       "LAST_7_DAYS": "Últimos 7 días",
       "LAST_30_DAYS": "Últimos 30 días",
       "LAST_3_MONTHS": "Últimos 3 meses",

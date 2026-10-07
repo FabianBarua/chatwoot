@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { dateRanges } from '../helpers/DatePickerHelper';
-import { format, isSameYear, isValid } from 'date-fns';
+import { format, isSameDay, isSameYear, isValid } from 'date-fns';
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import NextButton from 'dashboard/components-next/button/Button.vue';
 
@@ -35,6 +35,9 @@ const formatDateRange = computed(() => {
   if (!isValid(startDate) || !isValid(endDate)) {
     return 'Select a date range';
   }
+
+  // A single day (Today, Yesterday) reads as one date, not a range
+  if (isSameDay(startDate, endDate)) return format(startDate, 'MMM d, yyyy');
 
   const crossesYears = !isSameYear(startDate, endDate);
 

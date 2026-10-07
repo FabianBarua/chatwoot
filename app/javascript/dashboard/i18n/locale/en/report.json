@@ -224,7 +224,7 @@
   },
   "AGENT_ACTIVITY_REPORTS": {
     "HEADER": "Agent activity",
-    "DESCRIPTION": "Follow when each agent was online, busy or offline, how long they stayed connected and what they handled in the period. Expand a row to see every status change.",
+    "DESCRIPTION": "See who is connected now, when each agent worked and whether every hour of the day is covered. Use the tabs to switch views.",
     "DOWNLOAD": "Download CSV",
     "ALL_AGENTS": "All agents",
     "LOADING": "Loading agent activity...",
@@ -264,6 +264,34 @@
       "BUSY": "Total busy",
       "SESSIONS": "Sessions",
       "AGENTS_ONLINE": "Agents online now"
+    },
+    "CHARTS": {
+      "HOURS_BY_AGENT": "Hours connected by agent",
+      "HOURS_BY_AGENT_DESC": "Time online and busy in the period.",
+      "HOURS_BY_DAY": "Hours connected per day",
+      "HOURS_BY_DAY_DESC": "Each cell is the time online or busy of an agent on a day.",
+      "DAY_TIMELINE": "Day timeline",
+      "DAY_TIMELINE_DESC": "Who was connected at each hour of the day. Use the arrows to change the day.",
+      "PREVIOUS_DAY": "Previous day",
+      "NEXT_DAY": "Next day"
+    },
+    "TABS": {
+      "OVERVIEW": "Overview",
+      "TIMELINE": "Day timeline",
+      "COVERAGE": "Coverage",
+      "DETAILS": "Details"
+    },
+    "NOW": {
+      "TITLE": "Right now",
+      "DESCRIPTION": "Current status of every agent and since when.",
+      "SINCE": "since {time}"
+    },
+    "COVERAGE": {
+      "SERIES": "Agents connected",
+      "BY_HOUR": "Agents connected by hour",
+      "BY_HOUR_DESC": "Average number of agents online or busy at each hour of the day. Low bars are gaps in coverage.",
+      "BY_WEEKDAY": "Coverage by weekday and hour",
+      "BY_WEEKDAY_DESC": "Average agents connected. Darker means more people available."
     }
   },
   "LABEL_REPORTS": {
@@ -714,5 +742,114 @@
     "AVG_REPLY_TIME": "Avg. Customer Waiting Time",
     "RESOLUTION_COUNT": "Resolution Count",
     "CONVERSATIONS": "No. of conversations"
+  },
+  "AGENT_INSIGHTS": {
+    "HEADER": "Agents",
+    "DESCRIPTION": "Pick an agent to see their performance with charts, or compare the whole team. Each figure is compared with the previous period of the same length.",
+    "ALL_AGENTS": "All agents",
+    "SEARCH_AGENT": "Search agent",
+    "NO_AGENT_FOUND": "No agent found",
+    "LOADING": "Loading report...",
+    "EMPTY_CHART": "No data in this period",
+    "NO_CSAT": "No ratings in this period",
+    "VS_PREVIOUS": "Compared with the previous period",
+    "ROLES": {
+      "administrator": "Administrator",
+      "agent": "Agent"
+    },
+    "NOW": {
+      "OPEN": "Open now",
+      "UNATTENDED": "To reply now"
+    },
+    "KPI": {
+      "ATTENDED": "Conversations replied to",
+      "RESOLVED": "Resolved",
+      "MESSAGES_SENT": "Messages sent",
+      "FIRST_RESPONSE": "Avg. first response",
+      "ONLINE_HOURS": "Hours connected",
+      "CSAT": "Average CSAT",
+      "OPEN_NOW": "Open now",
+      "UNATTENDED_NOW": "To reply now"
+    },
+    "METRICS": {
+      "attended_conversations_count": "Conversations replied to",
+      "resolved_conversations_count": "Resolved",
+      "resolution_rate": "Resolution rate",
+      "outgoing_messages_count": "Messages sent",
+      "avg_first_response_time": "Avg. first response",
+      "avg_reply_time": "Avg. reply time",
+      "avg_resolution_time": "Avg. resolution time",
+      "presence_seconds": "Hours connected",
+      "sessions_count": "Sessions",
+      "private_notes_count": "Private notes",
+      "csat_average": "Average CSAT",
+      "csat_count": "CSAT responses",
+      "avg_hours_per_day": "Avg. hours per active day",
+      "satisfaction_rate": "Satisfaction"
+    },
+    "SERIES": {
+      "ATTENDED": "Replied to",
+      "RESOLVED": "Resolved",
+      "MESSAGES": "Messages",
+      "FIRST_RESPONSE": "First response",
+      "ASSIGNED": "Assigned"
+    },
+    "CHARTS": {
+      "CONVERSATIONS_BY_AGENT": "Conversations by agent",
+      "CONVERSATIONS_BY_AGENT_DESC": "Conversations each agent replied to and resolved in the period.",
+      "HOURS_BY_AGENT": "Hours connected by agent",
+      "HOURS_BY_AGENT_DESC": "Time online and busy in the period.",
+      "CONVERSATIONS_PER_DAY": "Assigned, replied to and resolved per day",
+      "CONVERSATIONS_PER_DAY_DESC": "What reached the agent each day and what they did with it.",
+      "HOURS_PER_DAY": "Hours connected per day",
+      "HOURS_PER_DAY_DESC": "Time online and busy each day.",
+      "MESSAGES_PER_DAY": "Messages sent per day",
+      "MESSAGES_PER_DAY_DESC": "Replies sent to customers, without private notes.",
+      "FIRST_RESPONSE_PER_DAY": "First response time per day",
+      "FIRST_RESPONSE_PER_DAY_DESC": "Average time until the first reply, lower is better.",
+      "WHEN_WORKS": "When they reply",
+      "WHEN_WORKS_DESC": "Messages sent by day of the week and hour.",
+      "PRESENCE_TIMELINE": "Status timeline",
+      "PRESENCE_TIMELINE_DESC": "Online and busy time hour by hour, last {days} days of the period.",
+      "CSAT": "Customer satisfaction",
+      "CSAT_DESC": "{rate}% of ratings were good or excellent.",
+      "LABELS": "Top labels",
+      "LABELS_DESC": "Labels of the conversations they replied to.",
+      "INBOXES": "Inboxes",
+      "INBOXES_DESC": "Where the conversations they replied to came from."
+    },
+    "RANKING": {
+      "TITLE": "Agent ranking",
+      "DESCRIPTION": "Click a column to sort and an agent to open their dashboard.",
+      "AGENT": "Agent",
+      "COLUMNS": {
+        "attended_conversations_count": "Replied",
+        "resolved_conversations_count": "Resolved",
+        "outgoing_messages_count": "Messages",
+        "avg_first_response_time": "First response",
+        "avg_reply_time": "Reply time",
+        "online_seconds": "Connected",
+        "csat_average": "CSAT",
+        "open_conversations": "Open / to reply"
+      }
+    },
+    "TABS": {
+      "SUMMARY": "Summary",
+      "SCHEDULE": "Schedule",
+      "QUALITY": "Quality"
+    },
+    "WORKLOAD": {
+      "TITLE": "Workload",
+      "DESCRIPTION": "Conversations assigned in the period and still active, and where they stand now.",
+      "ASSIGNED": "Assigned",
+      "ATTENDED": "Replied to",
+      "RESOLVED": "Resolved",
+      "OPEN": "Open",
+      "PENDING": "Pending",
+      "SNOOZED": "Snoozed",
+      "IN_ATTENTION": "Being handled now",
+      "EMPTY": "No conversations assigned in this period",
+      "WAITING_NOTE": "{count} waiting"
+    }
   }
 }

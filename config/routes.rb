@@ -558,6 +558,7 @@ Rails.application.routes.draw do
             end
           end
           resources :agent_activity_reports, only: [:index]
+          resources :agent_insights, only: [:index, :show]
           resource :year_in_review, only: [:show]
           resources :live_reports, only: [] do
             collection do
