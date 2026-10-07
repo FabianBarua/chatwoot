@@ -28,7 +28,7 @@ const isReel = computed(() => {
 
 <template>
   <BaseBubble
-    class="overflow-hidden p-3"
+    class="overflow-hidden p-1.5"
     data-bubble-name="video"
     @click="showGallery = true"
   >
@@ -41,11 +41,11 @@ const isReel = computed(() => {
       </div>
       <video
         controls
-        class="rounded-lg max-h-64 skip-context-menu"
+        class="rounded-lg max-h-48 skip-context-menu"
         :src="attachment.dataUrl"
         :class="{
           'max-w-48': isReel,
-          'max-w-full sm:max-w-72': !isReel,
+          'max-w-60': !isReel,
         }"
         @click.stop
         @error="handleError"

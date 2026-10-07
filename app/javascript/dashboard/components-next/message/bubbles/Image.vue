@@ -50,7 +50,7 @@ const handleImageError = () => {
 
 <template>
   <BaseBubble
-    class="overflow-hidden p-3"
+    class="overflow-hidden p-1.5"
     data-bubble-name="image"
     @click="showGallery = true"
   >
@@ -62,7 +62,7 @@ const handleImageError = () => {
     </div>
     <div v-else-if="isLoaded" class="relative group rounded-lg overflow-hidden">
       <img
-        class="block w-auto h-auto max-w-full sm:max-w-72 max-h-64 object-contain skip-context-menu"
+        class="block object-cover w-auto h-auto max-w-60 max-h-48 min-w-32 min-h-24 skip-context-menu"
         :src="attachment.dataUrl"
         :width="attachment.width"
         :height="attachment.height"
