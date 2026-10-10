@@ -156,7 +156,7 @@ Montar la carpeta de Windows es lento. Para correr muchas specs conviene copiar 
 
 ## Actualizar a una versión nueva de Chatwoot
 
-1. Crear la rama desde el tag de upstream, por ejemplo `git checkout -b v4.19.0-xp v4.19.0`.
+1. Traer el tag de Chatwoot oficial y crear la rama desde él, por ejemplo `git fetch upstream tag v4.19.0 --no-tags` y `git checkout -b v4.19.0-xp v4.19.0`. El fork en GitHub solo guarda la rama en uso: no tiene las ramas ni los tags de upstream.
 2. Traer los commits de Xplus desde la rama anterior (`git cherry-pick` de los commits `feat`, `fix`, `ci` y `build` de `v4.18.0-xp`), resolviendo conflictos.
 3. Revisar las funciones premium nuevas de `config/features.yml` y activarlas.
 4. Cambiar la versión en `config/app.yml` y `package.json` a `4.19.0-xp`.
