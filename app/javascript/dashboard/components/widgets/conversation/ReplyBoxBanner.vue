@@ -76,6 +76,22 @@ const botAssigneeName = computed(() => {
   return t('CONVERSATION.BOT_HANDOFF_FALLBACK_ASSIGNEE');
 });
 
+// Step the bot is on, set by the bot as the sox_step conversation attribute
+const botStep = computed(
+  () => currentChat.value?.custom_attributes?.sox_step || ''
+);
+
+const botHandoffMessage = computed(() =>
+  botStep.value
+    ? t('CONVERSATION.BOT_HANDOFF_MESSAGE_WITH_STEP', {
+        assigneeName: botAssigneeName.value,
+        step: botStep.value,
+      })
+    : t('CONVERSATION.BOT_HANDOFF_MESSAGE', {
+        assigneeName: botAssigneeName.value,
+      })
+);
+
 const selfAssignConversation = async () => {
   const { avatar_url, ...rest } = currentUser.value || {};
   assignedAgent.value = { ...rest, thumbnail: avatar_url };
@@ -135,11 +151,7 @@ const onClickBotHandoff = async () => {
     action-button-variant="ghost"
     color-scheme="secondary"
     class="mx-2 mb-2 rounded-lg !py-2"
-    :banner-message="
-      $t('CONVERSATION.BOT_HANDOFF_MESSAGE', {
-        assigneeName: botAssigneeName,
-      })
-    "
+    :banner-message="botHandoffMessage"
     has-action-button
     :action-button-label="$t('CONVERSATION.BOT_HANDOFF_ACTION')"
     @primary-action="onClickBotHandoff"

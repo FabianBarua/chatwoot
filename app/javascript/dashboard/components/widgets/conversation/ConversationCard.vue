@@ -198,8 +198,12 @@ watch(
           </span>
           <span
             v-if="isWithBot"
-            v-tooltip.top="$t('CHAT_LIST.BOT_TOOLTIP')"
-            class="text-n-teal-11 bg-n-teal-3 text-xs font-medium leading-3 py-0.5 px-1 rounded-sm inline-flex items-center gap-px flex-shrink min-w-0 max-w-[60%]"
+            v-tooltip.top="
+              botStep
+                ? `${botStep} · ${$t('CHAT_LIST.BOT_TOOLTIP')}`
+                : $t('CHAT_LIST.BOT_TOOLTIP')
+            "
+            class="text-n-teal-11 bg-n-teal-3 text-xs font-medium leading-3 py-0.5 px-1 rounded-sm inline-flex items-center gap-px min-w-0 max-w-[11rem]"
           >
             <Icon icon="i-lucide-bot" class="size-3 flex-shrink-0" />
             <span class="truncate">

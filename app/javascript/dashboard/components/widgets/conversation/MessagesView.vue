@@ -18,7 +18,6 @@ import ReferralBubble from 'dashboard/components-next/Conversation/ReferralBubbl
 
 // stores and apis
 import { mapGetters } from 'vuex';
-import { useAlert } from 'dashboard/composables';
 
 // mixins
 import inboxMixin, { INBOX_FEATURES } from 'shared/mixins/inboxMixin';
@@ -188,20 +187,6 @@ export default {
         instagramInbox
       );
     },
-    // Pending and assigned to an agent bot: the bot is driving the conversation
-    isHandledByBot() {
-      return (
-        this.currentChat?.status === wootConstants.STATUS_TYPE.PENDING &&
-        this.currentChat?.meta?.assignee_type === 'AgentBot'
-      );
-    },
-    botHandlingBannerMessage() {
-      const bot = this.currentChat?.meta?.assignee?.name || 'Bot';
-      const step = this.currentChat?.custom_attributes?.sox_step;
-      return step
-        ? this.$t('CONVERSATION.BOT_HANDLING.BANNER_WITH_STEP', { bot, step })
-        : this.$t('CONVERSATION.BOT_HANDLING.BANNER', { bot });
-    },
     isInstagramRestrictionBannerVisible() {
       return this.isMetaMessageSendingDisabled && this.isAnInstagramChannel;
     },
@@ -316,23 +301,6 @@ export default {
   },
 
   methods: {
-    // Opens the conversation and assigns it to me; the bot stops replying
-    async takeOverFromBot() {
-      const conversationId = this.currentChat.id;
-      try {
-        await this.$store.dispatch('toggleStatus', {
-          conversationId,
-          status: wootConstants.STATUS_TYPE.OPEN,
-        });
-        await this.$store.dispatch('assignAgent', {
-          conversationId,
-          agentId: this.currentUserId,
-        });
-        useAlert(this.$t('CONVERSATION.BOT_HANDLING.TAKE_OVER_SUCCESS'));
-      } catch (error) {
-        useAlert(this.$t('CONVERSATION.BOT_HANDLING.TAKE_OVER_ERROR'));
-      }
-    },
     async fetchSuggestions() {
       // start empty, this ensures that the label suggestions are not shown
       this.labelSuggestions = [];
@@ -508,16 +476,6 @@ export default {
     class="flex flex-col justify-between flex-grow h-full min-w-0 m-0"
   >
     <div ref="topBannerRef">
-      <Banner
-        v-if="isHandledByBot"
-        color-scheme="secondary"
-        class="mx-2 mt-2 overflow-hidden rounded-lg"
-        :banner-message="botHandlingBannerMessage"
-        has-action-button
-        action-button-icon="i-lucide-hand"
-        :action-button-label="$t('CONVERSATION.BOT_HANDLING.TAKE_OVER')"
-        @primary-action="takeOverFromBot"
-      />
       <Banner
         v-if="isInstagramRestrictionBannerVisible"
         color-scheme="warning"

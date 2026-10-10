@@ -44,6 +44,7 @@
     "NOT_ASSIGNED_TO_YOU": "Esta conversa não está atribuída a você. Gostaria de atribuir esta conversa a você mesmo?",
     "ASSIGN_TO_ME": "Atribuir a mim",
     "BOT_HANDOFF_MESSAGE": "Esta conversa está sendo atendida por {assigneeName}.",
+    "BOT_HANDOFF_MESSAGE_WITH_STEP": "Esta conversa está sendo conduzida por {assigneeName} · etapa: {step}",
     "BOT_HANDOFF_FALLBACK_ASSIGNEE": "um bot",
     "BOT_HANDOFF_ACTION": "Assumir atendimento",
     "BOT_HANDOFF_REOPEN_ACTION": "Marcar conversa como aberta",
@@ -52,13 +53,6 @@
     "TWILIO_WHATSAPP_CAN_REPLY": "Você só pode responder a esta conversa usando um modelo de mensagem devido a",
     "TWILIO_WHATSAPP_24_HOURS_WINDOW": "Restrições de janela de mensagem de 24 horas",
     "OLD_INSTAGRAM_INBOX_REPLY_BANNER": "Esta conta do Instagram foi migrada para a nova caixa de entrada do canal do Instagram. Todas as novas mensagens serão mostradas lá. Você não poderá mais enviar mensagens desta conversa.",
-    "BOT_HANDLING": {
-      "BANNER": "{bot} está conduzindo esta conversa. As mensagens chegam aqui em tempo real.",
-      "BANNER_WITH_STEP": "{bot} está conduzindo esta conversa · etapa: {step}",
-      "TAKE_OVER": "Assumir conversa",
-      "TAKE_OVER_SUCCESS": "Você assumiu a conversa. O bot parou de responder.",
-      "TAKE_OVER_ERROR": "Não foi possível assumir a conversa. Tente de novo."
-    },
     "INSTAGRAM_RESTRICTION_BANNER": "As mensagens do Instagram estão sendo afetadas por um problema na API da Meta, e não por uma falha no Chatwoot. Algumas mensagens ou ações podem sofrer atrasos ou ficar temporariamente indisponíveis. Estamos trabalhando em conjunto com a Meta para resolver a situação o mais rápido possível.",
     "INSTAGRAM_RESTRICTION_STATUS_LINK": "Ver atualizações de status",
     "REPLYING_TO": "Você está respondendo a:",
