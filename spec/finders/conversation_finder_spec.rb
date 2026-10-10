@@ -181,8 +181,27 @@ describe ConversationFinder do
                                        unassigned_count: 1,
                                        all_count: 5,
                                        unattended_count: 2,
-                                       transferred_count: 0
+                                       transferred_count: 0,
+                                       bot_count: 0
                                      })
+      end
+    end
+
+    context 'with assignee_type bot' do
+      let(:params) { { status: 'open', assignee_type: 'bot' } }
+      let!(:bot_conversation) do
+        create(:conversation, account: account, inbox: inbox, status: :pending, ai_assignee: create(:agent_bot, account: account))
+      end
+
+      it 'returns pending conversations regardless of the status filter' do
+        result = conversation_finder.perform
+        expect(result[:conversations]).to eq([bot_conversation])
+      end
+
+      it 'counts bot conversations separately from the open ones' do
+        result = conversation_finder.perform
+        expect(result[:count][:bot_count]).to eq 1
+        expect(result[:count][:all_count]).to eq 4
       end
     end
 
@@ -278,7 +297,8 @@ describe ConversationFinder do
                                        unassigned_count: 1,
                                        all_count: 4,
                                        unattended_count: 2,
-                                       transferred_count: 0
+                                       transferred_count: 0,
+                                       bot_count: 0
                                      })
       end
 

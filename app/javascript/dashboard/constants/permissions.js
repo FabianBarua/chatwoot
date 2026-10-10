@@ -52,6 +52,15 @@ export const ASSIGNEE_TYPE_TAB_PERMISSIONS = {
       CONVERSATION_UNASSIGNED_PERMISSIONS,
     ],
   },
+  // Handled by a bot right now (status pending), whatever the status filter says
+  bot: {
+    count: 'botCount',
+    permissions: [
+      ...ROLES,
+      MANAGE_ALL_CONVERSATION_PERMISSIONS,
+      CONVERSATION_UNASSIGNED_PERMISSIONS,
+    ],
+  },
   all: {
     count: 'allCount',
     permissions: [

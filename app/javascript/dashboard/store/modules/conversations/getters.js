@@ -133,6 +133,17 @@ const getters = {
       return isMine && isTransferred && shouldFilter;
     });
   },
+  // Handled by a bot right now: pending, whatever status filter the list is on
+  getBotChats: _state => activeFilters => {
+    return _state.allConversations.filter(conversation => {
+      const isWithBot = conversation.status === 'pending';
+      const shouldFilter = applyPageFilters(conversation, {
+        ...activeFilters,
+        status: 'pending',
+      });
+      return isWithBot && shouldFilter;
+    });
+  },
   getParticipatingChats: (_state, _, __, rootGetters) => activeFilters => {
     const currentUserId = rootGetters.getCurrentUser?.id;
     const getWatchers = rootGetters['conversationWatchers/getByConversationId'];

@@ -20,10 +20,13 @@
       "unassigned": "Unassigned",
       "unattended": "To reply",
       "transferred": "Transferred",
+      "bot": "Bot",
       "all": "All"
     },
     "TRANSFERRED_BADGE": "Transferred",
     "TRANSFERRED_TOOLTIP": "Transferred from another agent and not answered yet",
+    "BOT_BADGE": "Bot",
+    "BOT_TOOLTIP": "Handled by the bot right now. Open it and take over whenever you want.",
     "CHAT_STATUS_FILTER_ITEMS": {
       "open": {
         "TEXT": "Open"

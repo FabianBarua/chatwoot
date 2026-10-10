@@ -52,12 +52,22 @@ const voiceCallData = computed(() => {
 
 const isTransferred = computed(() => !!props.chat.transferred_at);
 
+// Pending and assigned to an agent bot: the bot is driving the conversation
+const isWithBot = computed(
+  () =>
+    props.chat.status === 'pending' &&
+    props.chat.meta?.assignee_type === 'AgentBot'
+);
+// Step the bot is on, set by the bot as the sox_step conversation attribute
+const botStep = computed(() => props.chat.custom_attributes?.sox_step || '');
+
 const showMetaSection = computed(() => {
   return (
     props.showInboxName ||
     (props.showAssignee && props.assignee.name) ||
     props.chat.priority ||
-    isTransferred.value
+    isTransferred.value ||
+    isWithBot.value
   );
 });
 
@@ -185,6 +195,16 @@ watch(
               class="size-3 flex-shrink-0"
             />
             {{ $t('CHAT_LIST.TRANSFERRED_BADGE') }}
+          </span>
+          <span
+            v-if="isWithBot"
+            v-tooltip.top="$t('CHAT_LIST.BOT_TOOLTIP')"
+            class="text-n-teal-11 bg-n-teal-3 text-xs font-medium leading-3 py-0.5 px-1 rounded-sm inline-flex items-center gap-px flex-shrink min-w-0 max-w-[60%]"
+          >
+            <Icon icon="i-lucide-bot" class="size-3 flex-shrink-0" />
+            <span class="truncate">
+              {{ botStep || $t('CHAT_LIST.BOT_BADGE') }}
+            </span>
           </span>
           <CardPriorityIcon
             :priority="chat.priority"

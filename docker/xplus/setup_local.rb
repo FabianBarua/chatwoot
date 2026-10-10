@@ -59,6 +59,14 @@ end
 # 4. unassigned
 conversation_for(account, inbox, 'María Sin Asignar')
 
+# 5. handled by a bot: pending, assigned to an agent bot, with the step it is on
+bot = account.agent_bots.find_by(name: 'SuporteOficialX') || account.agent_bots.create!(name: 'SuporteOficialX', description: 'Bot de prueba')
+c5 = conversation_for(account, inbox, 'Rosa Con Bot')
+unless c5.pending?
+  c5.update!(status: :pending, ai_assignee: bot, custom_attributes: { 'sox_step' => 'Menu: Horários', 'sox_flow' => 'Clínica v1' })
+  c5.messages.create!(account: account, inbox: inbox, message_type: :outgoing, content: 'Olá! Como posso ajudar?', sender: bot)
+end
+
 # some availability history for the report
 log = account.agent_availability_logs
 if log.empty?

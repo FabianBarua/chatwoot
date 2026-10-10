@@ -20,10 +20,13 @@
       "unassigned": "Não atribuídas",
       "unattended": "A responder",
       "transferred": "Transferidas",
+      "bot": "Bot",
       "all": "Todos"
     },
     "TRANSFERRED_BADGE": "Transferida",
     "TRANSFERRED_TOOLTIP": "Transferida de outro atendente e ainda sem resposta",
+    "BOT_BADGE": "Bot",
+    "BOT_TOOLTIP": "Está sendo conduzida pelo bot. Abra e assuma quando quiser.",
     "CHAT_STATUS_FILTER_ITEMS": {
       "open": {
         "TEXT": "Abertas"

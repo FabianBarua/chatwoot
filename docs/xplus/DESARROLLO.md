@@ -9,6 +9,7 @@ Guía para trabajar sobre la edición Xplus de Chatwoot: desde editar el código
 - **Producción:** Dokploy → proyecto **Server-Xplus** → compose **chatwoot** (dominio `chatwoot.website`). El compose usa `image: ghcr.io/fabianbarua/chatwoot:v4.18.0-xp` con `pull_policy: always`, así que cada Deploy baja la última imagen.
 - **Migraciones:** el servicio `chatwoot-rails` corre `rails db:chatwoot_prepare` al arrancar, así que las migraciones nuevas se aplican solas en cada Deploy.
 - **Edición enterprise:** el plan está fijo en `enterprise` (`lib/chatwoot_hub.rb`) y todas las funciones premium vienen activadas. No hace falta montar ningún initializer extra en el compose.
+- **Pestaña Bot:** la lista de conversaciones tiene una pestaña con las conversaciones que lleva un bot (estado `pending`), pensada para SuporteOficialX. Detalle en `docs/xplus/pestana-bot.md`.
 
 ## Requisitos en la PC
 

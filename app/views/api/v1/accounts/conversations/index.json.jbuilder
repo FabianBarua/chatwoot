@@ -6,6 +6,7 @@ json.data do
     json.all_count @conversations_count[:all_count]
     json.unattended_count @conversations_count[:unattended_count]
     json.transferred_count @conversations_count[:transferred_count]
+    json.bot_count @conversations_count[:bot_count]
   end
   json.payload do
     json.array! @conversations do |conversation|

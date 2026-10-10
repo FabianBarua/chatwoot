@@ -5,6 +5,7 @@ export default {
     UNASSIGNED: 'unassigned',
     UNATTENDED: 'unattended',
     TRANSFERRED: 'transferred',
+    BOT: 'bot',
     ALL: 'all',
   },
   STATUS_TYPE: {

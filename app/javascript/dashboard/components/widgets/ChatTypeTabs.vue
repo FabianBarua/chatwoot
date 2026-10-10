@@ -23,6 +23,7 @@ const TAB_ICONS = {
   unattended: 'i-lucide-clock-alert',
   transferred: 'i-lucide-arrow-right-left',
   unassigned: 'i-lucide-user-round-x',
+  bot: 'i-lucide-bot',
   all: 'i-lucide-inbox',
 };
 

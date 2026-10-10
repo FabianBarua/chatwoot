@@ -14,6 +14,8 @@ const props = defineProps({
   hasAppliedFilters: { type: Boolean, required: true },
   hasActiveFolders: { type: Boolean, required: true },
   activeStatus: { type: String, required: true },
+  // The active tab fixes the status (e.g. "Bot" = pending): hide the status menu
+  statusFilterLocked: { type: Boolean, default: false },
   isOnExpandedLayout: { type: Boolean, required: true },
   conversationStats: { type: Object, required: true },
   isListLoading: { type: Boolean, required: true },
@@ -172,7 +174,9 @@ const toggleConversationLayout = () => {
       <ConversationBasicFilter
         v-if="!isContactScoped"
         :is-on-expanded-layout="isOnExpandedLayout"
-        :show-status-filter="!hasAppliedFiltersOrActiveFolders"
+        :show-status-filter="
+          !hasAppliedFiltersOrActiveFolders && !statusFilterLocked
+        "
         @change-filter="onBasicFilterChange"
       />
       <SwitchLayout

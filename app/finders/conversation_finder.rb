@@ -49,11 +49,13 @@ class ConversationFinder
     set_assignee_type
 
     find_all_conversations
-    filter_by_status unless params[:q]
     filter_by_team
     filter_by_labels
-    filter_by_query
     filter_by_source_id
+    # "Bot" tab: conversations a bot is handling right now, whatever the status filter says
+    @bot_conversations = @conversations.pending
+    filter_by_status unless params[:q]
+    filter_by_query
   end
 
   def set_inboxes
@@ -106,6 +108,8 @@ class ConversationFinder
     when 'transferred'
       # Handed to the current agent by someone else and not answered by them yet
       @conversations = @conversations.assigned_to(current_user).transferred
+    when 'bot'
+      @conversations = @bot_conversations
     end
     @conversations
   end
@@ -168,7 +172,8 @@ class ConversationFinder
       unassigned_count: unassigned_count,
       all_count: all_count,
       unattended_count: unattended_count,
-      transferred_count: transferred_count
+      transferred_count: transferred_count,
+      bot_count: @bot_conversations.unscope(:order).count
     }
   end
 

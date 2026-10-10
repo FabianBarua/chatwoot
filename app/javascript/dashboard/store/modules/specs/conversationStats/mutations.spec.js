@@ -11,6 +11,7 @@ describe('#mutations', () => {
         all_count: 2,
         unattended_count: 1,
         transferred_count: 0,
+        bot_count: 3,
       });
       expect(state).toEqual({
         mineCount: 1,
@@ -18,6 +19,7 @@ describe('#mutations', () => {
         allCount: 2,
         unattendedCount: 1,
         transferredCount: 0,
+        botCount: 3,
         updatedOn: expect.any(Date),
       });
     });

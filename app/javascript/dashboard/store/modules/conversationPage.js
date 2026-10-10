@@ -6,6 +6,7 @@ const state = {
     unassigned: 0,
     unattended: 0,
     transferred: 0,
+    bot: 0,
     all: 0,
     appliedFilters: 0,
   },
@@ -14,6 +15,7 @@ const state = {
     unassigned: false,
     unattended: false,
     transferred: false,
+    bot: false,
     all: false,
   },
 };
@@ -51,6 +53,7 @@ export const mutations = {
   },
   [types.default.SET_CONVERSATION_END_REACHED]: ($state, { filter }) => {
     // Every other tab is a subset of "all", so they are fully loaded too
+    // ("bot" is not: it ignores the status filter)
     if (filter === 'all') {
       $state.hasEndReached = {
         ...$state.hasEndReached,
@@ -71,6 +74,7 @@ export const mutations = {
       unassigned: 0,
       unattended: 0,
       transferred: 0,
+      bot: 0,
       all: 0,
       appliedFilters: 0,
     };
@@ -80,6 +84,7 @@ export const mutations = {
       unassigned: false,
       unattended: false,
       transferred: false,
+      bot: false,
       all: false,
       appliedFilters: false,
     };

@@ -93,6 +93,7 @@ const allChatList = useMapGetter('getAllStatusChats');
 const unAssignedChatsList = useMapGetter('getUnAssignedChats');
 const unattendedChatsList = useMapGetter('getUnattendedChats');
 const transferredChatsList = useMapGetter('getTransferredChats');
+const botChatsList = useMapGetter('getBotChats');
 const participatingChatsList = useMapGetter('getParticipatingChats');
 const chatListLoading = useMapGetter('getChatListLoadingStatus');
 const activeInbox = useMapGetter('getSelectedInbox');
@@ -185,6 +186,11 @@ const assigneeTabItems = computed(() => {
     count: conversationStats.value[countKey] || 0,
   }));
 });
+
+// The "Bot" tab lists pending conversations whatever the status filter says
+const isBotTab = computed(
+  () => activeAssigneeTab.value === wootConstants.ASSIGNEE_TYPE.BOT
+);
 
 const showAssigneeInConversationCard = computed(() => {
   return (
@@ -316,6 +322,11 @@ function filterByAssigneeTab(conversations) {
       c => c.meta?.assignee?.id === currentUser.value?.id && !!c.transferred_at
     );
   }
+  if (isBotTab.value) {
+    return conversations.filter(
+      c => c.status === wootConstants.STATUS_TYPE.PENDING
+    );
+  }
   return [...conversations];
 }
 
@@ -344,6 +355,8 @@ const conversationList = computed(() => {
       localConversationList = [...unattendedChatsList.value(filters)];
     } else if (activeAssigneeTab.value === 'transferred') {
       localConversationList = [...transferredChatsList.value(filters)];
+    } else if (activeAssigneeTab.value === 'bot') {
+      localConversationList = [...botChatsList.value(filters)];
     } else {
       localConversationList = [...allChatList.value(filters)];
     }
@@ -906,7 +919,10 @@ watch(appliedFilters, () => resetBulkActions());
       :contact-filter="appliedContactFilter"
       :has-applied-filters="hasAppliedFilters"
       :has-active-folders="hasActiveFolders"
-      :active-status="activeStatus"
+      :active-status="
+        isBotTab ? wootConstants.STATUS_TYPE.PENDING : activeStatus
+      "
+      :status-filter-locked="isBotTab"
       :is-on-expanded-layout="isOnExpandedLayout"
       :conversation-stats="conversationStats"
       :is-list-loading="chatListLoading && !conversationList.length"
