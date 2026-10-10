@@ -1,0 +1,22 @@
+.bundle
+.env
+.env.*
+docker-compose.*
+docker/Dockerfile
+docker/dockerfiles
+log
+storage
+public/system
+tmp
+.codeclimate.yml
+public/packs
+node_modules
+vendor/bundle
+.DS_Store
+*.swp
+*~
+
+# Solo para Dockerfile.fast: el SHA llega como build-arg
+.git
+.github
+spec
