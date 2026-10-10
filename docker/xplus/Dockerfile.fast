@@ -1,0 +1,25 @@
+# Compilación rápida: el código nuevo y los assets encima de la última imagen publicada.
+# Las gems ya vienen instaladas en la base (Gemfile.lock no cambió: `bundle check` lo verifica),
+# así se evita compilar grpc/protobuf, que en Windows puede tumbar la VM de Docker Desktop.
+# Uso: docker/xplus/build-fast.sh  (ver docs/xplus/DESARROLLO.md)
+ARG BASE=ghcr.io/fabianbarua/chatwoot:v4.18.0-xp
+FROM ${BASE}
+
+ARG PNPM_VERSION="10.2.0"
+ENV NODE_OPTIONS="--max-old-space-size=4096 --openssl-legacy-provider"
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+  && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+  && npm install -g pnpm@${PNPM_VERSION}
+
+WORKDIR /app
+COPY . /app
+
+RUN bundle check \
+  && git rev-parse HEAD > /app/.git_sha \
+  && mkdir -p /app/log \
+  && pnpm i --frozen-lockfile \
+  && SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
+  && rm -rf spec node_modules tmp/cache .git .gitignore

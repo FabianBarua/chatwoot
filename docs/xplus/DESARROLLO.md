@@ -68,6 +68,12 @@ Commiteá primero: el script compila desde un clon limpio del commit, no desde l
 docker/xplus/build.sh
 ```
 
+Si la compilación completa tumba el motor de Docker Desktop (en Windows pasa al compilar la gem `grpc`: la VM de WSL se queda sin memoria), usá la compilación rápida: pone el código y los assets del commit encima de la última imagen publicada y no recompila gems. Solo sirve mientras `Gemfile.lock` no cambie (`bundle check` lo verifica) y acepta `--push` y `--base <imagen>` igual que `build.sh`.
+
+```bash
+docker/xplus/build-fast.sh
+```
+
 ```bash
 docker compose -f docker/xplus/docker-compose.local.yaml up -d
 ```
