@@ -15,11 +15,13 @@ RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
   && npm install -g pnpm@${PNPM_VERSION}
 
 WORKDIR /app
+# Dockerfile.fast.dockerignore deja fuera .git y spec: el commit llega como argumento.
 COPY . /app
 
+ARG GIT_SHA
 RUN bundle check \
-  && git rev-parse HEAD > /app/.git_sha \
+  && echo "${GIT_SHA}" > /app/.git_sha \
   && mkdir -p /app/log \
-  && pnpm i --frozen-lockfile \
+  && pnpm i --frozen-lockfile --store-dir /tmp/pnpm-store \
   && SECRET_KEY_BASE=precompile_placeholder RAILS_LOG_TO_STDOUT=enabled bundle exec rake assets:precompile \
-  && rm -rf spec node_modules tmp/cache .git .gitignore
+  && rm -rf node_modules tmp/cache /tmp/pnpm-store /root/.cache /root/.local/share/pnpm/store

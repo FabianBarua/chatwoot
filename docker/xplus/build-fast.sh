@@ -44,6 +44,7 @@ docker pull "$BASE"
 echo "==> docker build rápido ($IMAGE:$BRANCH y $IMAGE:$BRANCH-$SHA)"
 DOCKER_BUILDKIT=1 docker build -f "$ROOT/docker/xplus/Dockerfile.fast" \
   --build-arg BASE="$BASE" \
+  --build-arg GIT_SHA="$(git -C "$WORK/src" rev-parse HEAD)" \
   -t chatwoot:xp-local \
   -t "$IMAGE:$BRANCH" \
   -t "$IMAGE:$BRANCH-$SHA" \
