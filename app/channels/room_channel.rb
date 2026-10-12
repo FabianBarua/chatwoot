@@ -32,7 +32,10 @@ class RoomChannel < ApplicationCable::Channel
   def update_subscription
     return if @current_account.blank?
 
+    present = @current_user.is_a?(User) && ::OnlineStatusTracker.get_presence(@current_account.id, 'User', @current_user.id)
     ::OnlineStatusTracker.update_presence(@current_account.id, @current_user.class.name, @current_user.id)
+    # Xplus: agente que vuelve a estar presente (abrió el panel, la pestaña despertó): hay quien atienda lo que esperaba.
+    AutoAssignment::AgentOnlineService.new(account: @current_account, user: @current_user).perform if @current_user.is_a?(User) && !present
   end
 
   def pubsub_token

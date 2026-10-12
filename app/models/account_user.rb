@@ -41,6 +41,8 @@ class AccountUser < ApplicationRecord
   after_save :update_presence_in_redis, :log_availability_change, if: :saved_change_to_availability?
   after_commit :invalidate_filtered_unread_count_visibility, on: [:create, :destroy]
   after_update_commit :invalidate_filtered_unread_count_visibility_update, if: :filtered_unread_count_visibility_changed?
+  # Xplus: el agente que se pone "online" recibe las conversaciones que esperaban en sus bandejas.
+  after_update_commit :assign_waiting_conversations, if: -> { previous_changes.key?('availability') && online? }
 
   validates :user_id, uniqueness: { scope: :account_id }
 
@@ -85,6 +87,10 @@ class AccountUser < ApplicationRecord
   # Runs after the Redis status is updated so the logged status matches what the dashboard shows
   def log_availability_change
     Agents::AvailabilityLogService.new(account: account).record(user_id, availability_status)
+  end
+
+  def assign_waiting_conversations
+    AutoAssignment::AgentOnlineService.new(account: account, user: user).perform
   end
 
   def filtered_unread_count_visibility_changed?

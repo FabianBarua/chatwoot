@@ -10,6 +10,7 @@ Guía para trabajar sobre la edición Xplus de Chatwoot: desde editar el código
 - **Migraciones:** el servicio `chatwoot-rails` corre `rails db:chatwoot_prepare` al arrancar, así que las migraciones nuevas se aplican solas en cada Deploy.
 - **Edición enterprise:** el plan está fijo en `enterprise` (`lib/chatwoot_hub.rb`) y todas las funciones premium vienen activadas. No hace falta montar ningún initializer extra en el compose.
 - **Pestaña Bot:** la lista de conversaciones tiene una pestaña con las conversaciones que lleva un bot (estado `pending`), pensada para SuporteOficialX. Detalle en `docs/xplus/pestana-bot.md`.
+- **Asignación al conectarse:** cuando un agente se pone online (o vuelve a estar presente), se reparten las conversaciones que esperaban en sus bandejas. Detalle en `docs/xplus/asignacion-al-conectarse.md`.
 
 ## Requisitos en la PC
 
