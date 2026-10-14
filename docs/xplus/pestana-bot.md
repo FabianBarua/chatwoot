@@ -10,7 +10,7 @@ La lista de conversaciones tiene una pestaña **Bot** (Mías · Por responder ·
 - **Aviso sobre la caja de respuesta**: el aviso de upstream "Esta conversa está sendo atendida por SuporteOficialX" (con su botón **Assumir**, que abre la conversación y la asigna al agente actual) ahora suma la etapa: "… · etapa: Menu: Início". Al asumir, Chatwoot dispara `conversation_status_changed` y `conversation_updated` al webhook de la cuenta y SuporteOficialX detiene el bot.
 - **Tiempo real**: las conversaciones nuevas llegan por ActionCable como siempre; al cambiar a `open` salen de la pestaña Bot y entran en Mías / Sin asignar.
 
-Permisos: la ven administradores, agentes y roles personalizados con `conversation_manage` o `conversation_unassigned_manage` (las conversaciones del bot no tienen agente humano asignado).
+Permisos: la ven administradores, agentes y roles personalizados con `conversation_manage` o `conversation_unassigned_manage`. Para ese segundo permiso, una conversación en manos del bot (sin agente humano asignado) cuenta como no asignada (`Enterprise::ConversationPolicy#held_by_bot?`): el agente puede abrirla y asumirla. Antes, como Chatwoot la considera asignada al agent bot, cada clic devolvía 401 salvo con "Gerenciar todas as conversas".
 
 ## Cómo la usa SuporteOficialX
 

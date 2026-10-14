@@ -19,7 +19,7 @@ module Enterprise::ConversationPolicy
   def permits_unassigned_manage?(permissions)
     return false unless permissions.include?('conversation_unassigned_manage')
 
-    unassigned_conversation? || assigned_to_user?
+    unassigned_conversation? || held_by_bot? || assigned_to_user?
   end
 
   def permits_participating?(permissions)
@@ -30,6 +30,14 @@ module Enterprise::ConversationPolicy
 
   def unassigned_conversation?
     record.assignee_id.nil? && record.assignee_agent_bot_id.nil?
+  end
+
+  # Xplus: a conversation an agent bot is handling (SuporteOficialX keeps it "pending" with the
+  # bot as assignee) has no human owner. Whoever may manage unassigned conversations must be able
+  # to open it and take it over from the "Bot" tab; otherwise only "manage all" roles could, and
+  # every click on a bot conversation returned 401.
+  def held_by_bot?
+    record.assignee_id.nil? && record.assignee_agent_bot_id.present?
   end
 
   def custom_role_permissions?

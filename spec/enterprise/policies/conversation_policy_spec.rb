@@ -34,8 +34,15 @@ RSpec.describe ConversationPolicy, type: :policy do
         expect(subject).not_to permit(context, conversation)
       end
 
-      it 'denies access to conversations assigned to an agent bot' do
+      it 'allows access to conversations an agent bot is handling (no human assignee, Xplus: "Bot" tab)' do
         conversation = create(:conversation, account: account, inbox: inbox, ai_assignee: create(:agent_bot, account: account))
+
+        expect(subject).to permit(context, conversation)
+      end
+
+      it 'still denies a bot conversation once a human other than the agent owns it' do
+        other_agent = create(:user, account: account, role: :agent)
+        conversation = create(:conversation, account: account, inbox: inbox, assignee: other_agent, ai_assignee: create(:agent_bot, account: account))
 
         expect(subject).not_to permit(context, conversation)
       end
