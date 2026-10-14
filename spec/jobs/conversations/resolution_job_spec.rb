@@ -46,6 +46,15 @@ RSpec.describe Conversations::ResolutionJob do
       expect(waiting_conversation.reload.status).to eq('resolved')
       expect(non_waiting_conversation.reload.status).to eq('resolved')
     end
+
+    it 'resolves idle pending (bot) conversations instead of reopening them' do
+      account.update(auto_resolve_after: 14_400, auto_resolve_ignore_waiting: false) # 10 days in minutes
+      pending_conversation = create(:conversation, account: account, status: :pending, last_activity_at: 13.days.ago)
+
+      described_class.perform_now(account: account)
+
+      expect(pending_conversation.reload.status).to eq('resolved')
+    end
   end
 
   # When a contact is deleted, there's a brief window (~50-150ms) where contact_id becomes nil
