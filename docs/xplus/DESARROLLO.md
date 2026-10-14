@@ -141,6 +141,7 @@ Tiene que responder `"version":"4.18.0-xp"` con `queue_services` y `data_service
 | Workflow "Imagen Xplus" falla en 2 segundos | Cuenta de GitHub bloqueada por facturación | Resolver la facturación o usar `docker/xplus/build.sh --push`. |
 | `pnpm story:dev` (Histoire) no muestra componentes | Falla al cargar historias en este entorno | Verificar en la app local (paso 3). |
 | Algunas specs de upstream fallan | Esperan los valores de la edición community (plan del hub, Captain apagado) | Es esperado en Xplus. |
+| "Assumir atendimento" avisa éxito pero la conversación vuelve al bot | El pedido al servidor no llegó (red, 429 del límite por IP, proxy) y la pantalla lo daba por hecho | El botón reintenta una vez, confirma con el servidor y, si falla, muestra el código HTTP. El límite `req/ip` cuenta por la IP real del visitante (`CF-Connecting-IP`), 6000 por minuto (`RACK_ATTACK_LIMIT`). |
 
 ## RSpec
 

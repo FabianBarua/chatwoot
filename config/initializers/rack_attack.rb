@@ -25,6 +25,15 @@ class Rack::Attack
       @remote_ip ||= (env['action_dispatch.remote_ip'] || ip).to_s
     end
 
+    # Behind Cloudflare (and Traefik) the address Rack sees is the Cloudflare edge
+    # that forwarded the request, shared by every visitor routed through it: at
+    # peak all agents of an account land in the same `req/ip` bucket and their
+    # clicks (toggle_status, assignments, messages) get a 429. Cloudflare sends the
+    # visitor's own address in CF-Connecting-IP; use it when present.
+    def ip
+      @client_ip ||= get_header('HTTP_CF_CONNECTING_IP').presence || super
+    end
+
     def allowed_ip?
       default_allowed_ips = ['127.0.0.1', '::1']
       env_allowed_ips = ENV.fetch('RACK_ATTACK_ALLOWED_IPS', '').split(',').map(&:strip)
@@ -64,11 +73,11 @@ class Rack::Attack
   # counted by rack-attack and this throttle may be activated too
   # quickly. If so, enable the condition to exclude them from tracking.
 
-  # Throttle all requests by IP (60rpm)
+  # Throttle all requests by client IP (RACK_ATTACK_LIMIT per minute, 6000 by default)
   #
   # Key: "rack::attack:#{Time.now.to_i/:period}:req/ip:#{req.ip}"
 
-  throttle('req/ip', limit: ENV.fetch('RACK_ATTACK_LIMIT', '3000').to_i, period: 1.minute, &:ip)
+  throttle('req/ip', limit: ENV.fetch('RACK_ATTACK_LIMIT', '6000').to_i, period: 1.minute, &:ip)
 
   ###-----------------------------------------------###
   ###-----Authentication Related Throttling---------###
@@ -356,6 +365,7 @@ ActiveSupport::Notifications.subscribe('throttle.rack_attack') do |_name, _start
 
   Rails.logger.warn(
     "[Rack::Attack][Blocked] remote_ip: \"#{req.remote_ip}\", " \
+    "client_ip: \"#{req.ip}\", " \
     "path: \"#{req.path}\", " \
     "user_identifier: \"#{user_identifier}\", " \
     "account_id: \"#{account_id}\", " \

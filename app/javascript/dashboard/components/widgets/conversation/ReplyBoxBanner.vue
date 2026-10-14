@@ -1,10 +1,11 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useMapGetter } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import { useI18n } from 'vue-i18n';
 import wootConstants from 'dashboard/constants/globals';
+import ConversationApi from 'dashboard/api/inbox/conversation';
 
 import Banner from 'dashboard/components/ui/Banner.vue';
 
@@ -97,10 +98,6 @@ const selfAssignConversation = async () => {
   assignedAgent.value = { ...rest, thumbnail: avatar_url };
 };
 
-const needsAssignmentToCurrentUser = computed(() => {
-  return isUnassigned.value || isAssignedToOtherAgent.value;
-});
-
 const onClickSelfAssign = async () => {
   try {
     await selfAssignConversation();
@@ -110,27 +107,63 @@ const onClickSelfAssign = async () => {
   }
 };
 
-const reopenConversation = async () => {
-  await store.dispatch('toggleStatus', {
-    conversationId: currentChat.value?.id,
-    status: 'open',
-  });
+const HANDOFF_RETRY_DELAY_MS = 800;
+
+// No response (network, proxy), 429 or 5xx: the request may never have
+// reached Rails, so it is worth one more try.
+const isTransientError = error => {
+  const status = error?.response?.status;
+  return !status || status === 429 || status >= 500;
 };
 
-const onClickBotHandoff = async () => {
+const requestWithRetry = async request => {
   try {
-    const shouldAssignToCurrentUser =
-      isAgentBotOwned.value || needsAssignmentToCurrentUser.value;
+    return await request();
+  } catch (error) {
+    if (!isTransientError(error)) throw error;
+    await new Promise(resolve => {
+      setTimeout(resolve, HANDOFF_RETRY_DELAY_MS);
+    });
+    return request();
+  }
+};
 
-    await reopenConversation();
+const isHandingOff = ref(false);
 
-    if (shouldAssignToCurrentUser) {
-      await selfAssignConversation();
+// Talks to the API directly and confirms on the server before telling the
+// agent: the store actions swallow errors, so the UI used to say "handed
+// over" even when the request never went through and the bot kept the chat.
+const onClickBotHandoff = async () => {
+  const conversationId = currentChat.value?.id;
+  if (!conversationId || isHandingOff.value) return;
+
+  isHandingOff.value = true;
+  try {
+    await requestWithRetry(() =>
+      ConversationApi.toggleStatus({ conversationId, status: 'open' })
+    );
+    await requestWithRetry(() =>
+      ConversationApi.assignAgent({
+        conversationId,
+        agentId: currentUser.value?.id,
+        assigneeType: 'User',
+      })
+    );
+    const { data } = await ConversationApi.show(conversationId);
+    await store.dispatch('updateConversation', data);
+    if (data.status !== wootConstants.STATUS_TYPE.OPEN) {
+      throw new Error(`conversation ${conversationId} still ${data.status}`);
     }
-
     useAlert(t('CONVERSATION.BOT_HANDOFF_SUCCESS'));
   } catch (error) {
-    useAlert(t('CONVERSATION.BOT_HANDOFF_ERROR'));
+    const status = error?.response?.status;
+    useAlert(
+      status
+        ? t('CONVERSATION.BOT_HANDOFF_ERROR_HTTP', { status })
+        : t('CONVERSATION.BOT_HANDOFF_ERROR')
+    );
+  } finally {
+    isHandingOff.value = false;
   }
 };
 </script>
