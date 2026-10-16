@@ -54,6 +54,12 @@ class ReportsAPI extends ApiClient {
     });
   }
 
+  getBotInsights({ since, until }) {
+    return axios.get(`${this.baseUrl()}/bot_insights`, {
+      params: { since, until, timezone_offset: getTimeOffset() },
+    });
+  }
+
   getAgentActivityCSV({ since, until, userId }) {
     return axios.get(`${this.baseUrl()}/agent_activity_reports.csv`, {
       params: {

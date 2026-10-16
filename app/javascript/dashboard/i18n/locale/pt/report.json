@@ -619,6 +619,81 @@
       }
     }
   },
+  "BOT_INSIGHTS": {
+    "HEADER": "Bot",
+    "DESCRIPTION": "Como está o bot: o que lhe chegou, o que resolveu sozinho, o que passou à equipa e onde os clientes desistem. Cada número é comparado com o período anterior com a mesma duração.",
+    "BOT_BADGE": "Bot",
+    "NO_BOT_TITLE": "Sem bot",
+    "NO_BOT": "Nenhuma caixa de entrada tem um bot ativo. Os números cobrem as caixas que o tiveram.",
+    "EMPTY_CHART": "Sem dados neste período",
+    "NO_CSAT": "Sem avaliações neste período",
+    "CONVERSATIONS_HINT": "{count} conversas",
+    "NOW": {
+      "PENDING": "Com o bot agora",
+      "UNASSIGNED": "Passadas e sem atribuição"
+    },
+    "TABS": {
+      "SUMMARY": "Resumo",
+      "SCHEDULE": "Horários",
+      "QUALITY": "Qualidade"
+    },
+    "METRICS": {
+      "conversations_count": "Conversas atendidas",
+      "bot_resolved_count": "Resolvidas pelo bot",
+      "handoff_count": "Passadas à equipa",
+      "taken_over_count": "Assumidas por um agente",
+      "auto_resolved_count": "Fechadas por inatividade",
+      "outgoing_messages_count": "Mensagens do bot",
+      "avg_resolution_time": "Tempo médio até resolver",
+      "avg_handoff_time": "Tempo médio até passar",
+      "resolution_rate": "Taxa de resolução",
+      "handoff_rate": "Taxa de passagem",
+      "inactivity_rate": "Taxa de inatividade",
+      "csat_average": "CSAT médio",
+      "csat_count": "Respostas CSAT",
+      "satisfaction_rate": "Satisfação",
+      "busiest_weekday": "Dia com mais conversas",
+      "peak_hour": "Hora de pico",
+      "avg_per_day": "Conversas por dia"
+    },
+    "SERIES": {
+      "ATTENDED": "Atendidas",
+      "RESOLVED": "Resolvidas pelo bot",
+      "HANDED_OFF": "Passadas",
+      "INACTIVITY": "Inatividade",
+      "MESSAGES": "Mensagens",
+      "CONVERSATIONS": "Conversas"
+    },
+    "OUTCOMES": {
+      "TITLE": "Como terminaram as conversas",
+      "DESCRIPTION": "Conversas que chegaram ao bot no período e o que lhes aconteceu. Uma conversa que o bot passou conta como passada, aconteça o que acontecer depois.",
+      "ATTENDED": "Chegaram ao bot",
+      "RESOLVED": "Resolvidas pelo bot",
+      "HANDED_OFF": "Passadas à equipa",
+      "TAKEN_OVER": "Assumidas por um agente",
+      "INACTIVITY": "Fechadas por inatividade",
+      "EMPTY": "Nenhuma conversa chegou ao bot neste período"
+    },
+    "CHARTS": {
+      "CONVERSATIONS_PER_DAY": "Conversas por dia",
+      "CONVERSATIONS_PER_DAY_DESC": "O que chegou ao bot em cada dia e como terminou.",
+      "MESSAGES_PER_DAY": "Mensagens do bot por dia",
+      "MESSAGES_PER_DAY_DESC": "Mensagens que o bot enviou aos clientes.",
+      "WHEN_WRITE": "Quando os clientes escrevem",
+      "WHEN_WRITE_DESC": "Conversas que chegaram ao bot por dia da semana e hora.",
+      "BY_HOUR": "Conversas por hora",
+      "BY_HOUR_DESC": "Todos os dias do período juntos.",
+      "CSAT": "Satisfação do cliente",
+      "CSAT_DESC": "{rate}% das avaliações foram boas ou excelentes.",
+      "CSAT_EMPTY_DESC": "Avaliações das conversas que o bot resolveu.",
+      "DROP_OFF": "Onde os clientes desistem",
+      "DROP_OFF_DESC": "Etapa em que o bot estava quando a conversa foi fechada por inatividade.",
+      "TITLES": "Assuntos",
+      "TITLES_DESC": "Assunto que o bot deu a cada conversa.",
+      "LABELS": "Etiquetas mais frequentes",
+      "LABELS_DESC": "Etiquetas das conversas que chegaram ao bot."
+    }
+  },
   "OVERVIEW_REPORTS": {
     "HEADER": "Visão geral",
     "LIVE": "Disponível",

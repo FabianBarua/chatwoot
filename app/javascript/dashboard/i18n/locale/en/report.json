@@ -619,6 +619,81 @@
       }
     }
   },
+  "BOT_INSIGHTS": {
+    "HEADER": "Bot",
+    "DESCRIPTION": "How the bot is doing: what reached it, what it resolved on its own, what it handed to the team and where customers drop off. Each figure is compared with the previous period of the same length.",
+    "BOT_BADGE": "Bot",
+    "NO_BOT_TITLE": "No bot",
+    "NO_BOT": "No inbox has an active bot. The figures cover the inboxes that had one.",
+    "EMPTY_CHART": "No data in this period",
+    "NO_CSAT": "No ratings in this period",
+    "CONVERSATIONS_HINT": "{count} conversations",
+    "NOW": {
+      "PENDING": "With the bot now",
+      "UNASSIGNED": "Handed off, unassigned"
+    },
+    "TABS": {
+      "SUMMARY": "Summary",
+      "SCHEDULE": "Schedule",
+      "QUALITY": "Quality"
+    },
+    "METRICS": {
+      "conversations_count": "Conversations handled",
+      "bot_resolved_count": "Resolved by the bot",
+      "handoff_count": "Handed to the team",
+      "taken_over_count": "Taken over by an agent",
+      "auto_resolved_count": "Closed by inactivity",
+      "outgoing_messages_count": "Bot messages",
+      "avg_resolution_time": "Avg. time to resolve",
+      "avg_handoff_time": "Avg. time to hand off",
+      "resolution_rate": "Resolution rate",
+      "handoff_rate": "Handoff rate",
+      "inactivity_rate": "Inactivity rate",
+      "csat_average": "Average CSAT",
+      "csat_count": "CSAT responses",
+      "satisfaction_rate": "Satisfaction",
+      "busiest_weekday": "Busiest day",
+      "peak_hour": "Peak hour",
+      "avg_per_day": "Avg. conversations per day"
+    },
+    "SERIES": {
+      "ATTENDED": "Handled",
+      "RESOLVED": "Resolved by the bot",
+      "HANDED_OFF": "Handed off",
+      "INACTIVITY": "Inactivity",
+      "MESSAGES": "Messages",
+      "CONVERSATIONS": "Conversations"
+    },
+    "OUTCOMES": {
+      "TITLE": "How conversations ended",
+      "DESCRIPTION": "Conversations that reached the bot in the period and what happened to them. A conversation the bot handed off counts as handed off, whatever happened next.",
+      "ATTENDED": "Reached the bot",
+      "RESOLVED": "Resolved by the bot",
+      "HANDED_OFF": "Handed to the team",
+      "TAKEN_OVER": "Taken over by an agent",
+      "INACTIVITY": "Closed by inactivity",
+      "EMPTY": "No conversations reached the bot in this period"
+    },
+    "CHARTS": {
+      "CONVERSATIONS_PER_DAY": "Conversations per day",
+      "CONVERSATIONS_PER_DAY_DESC": "What reached the bot each day and how it ended.",
+      "MESSAGES_PER_DAY": "Bot messages per day",
+      "MESSAGES_PER_DAY_DESC": "Messages the bot sent to customers.",
+      "WHEN_WRITE": "When customers write",
+      "WHEN_WRITE_DESC": "Conversations that reached the bot by day of the week and hour.",
+      "BY_HOUR": "Conversations by hour",
+      "BY_HOUR_DESC": "All days of the period together.",
+      "CSAT": "Customer satisfaction",
+      "CSAT_DESC": "{rate}% of ratings were good or excellent.",
+      "CSAT_EMPTY_DESC": "Ratings of conversations the bot resolved.",
+      "DROP_OFF": "Where customers drop off",
+      "DROP_OFF_DESC": "Step the bot was on when the conversation was closed by inactivity.",
+      "TITLES": "Subjects",
+      "TITLES_DESC": "Subject the bot gave each conversation.",
+      "LABELS": "Top labels",
+      "LABELS_DESC": "Labels of the conversations that reached the bot."
+    }
+  },
   "OVERVIEW_REPORTS": {
     "HEADER": "Overview",
     "LIVE": "Live",
