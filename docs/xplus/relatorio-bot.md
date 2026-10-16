@@ -11,7 +11,9 @@ Upstream grababa `conversation_bot_resolved` cada vez que una conversación de u
 - `ReportingEventListener#conversation_resolved` graba `conversation_auto_resolved` en vez de `conversation_bot_resolved` cuando el evento trae esa marca. Las dos condiciones de upstream siguen: bandeja con bot activo y ningún mensaje saliente de un `User`. Si un agente había escrito, no se graba ninguno de los dos (como antes).
 - El evento está registrado en `ReportingEvents::EventMetricRegistry`, `ReportingEvents::MetricRegistry` y `Reports::ReportMetricRegistry` con la métrica `auto_resolutions_count`, así que entra en el rollup diario (`RollupService`, `BackfillService`) y se puede pedir por `GET /api/v2/accounts/:id/reports?metric=auto_resolutions_count`. `BackfillService` no necesitó cambios: toma la lista de eventos del registro.
 
-El evento solo vale desde el despliegue. Las `conversation_bot_resolved` anteriores siguen mezclando inactividad; si hace falta separarlas, se puede renombrar a mano las que tengan la etiqueta de `auto_resolve_label` o `sox_encerramento = Inatividade`.
+El evento solo vale desde el despliegue. Para el histórico, el 16/10/2026 se renombraron en producción (cuenta Xplus) las 892 `conversation_bot_resolved` cuyas conversaciones tenían `sox_encerramento = Inatividade` (el atributo que SuporteOficialX escribe al cerrar; la etiqueta `inatividade` solo existe desde el 14/10 y cubría 280). Se hizo con `rails runner` desde una tarea programada de Dokploy (`ReportingEvent.where(name: 'conversation_bot_resolved', conversation_id: <ids>).update_all(name: 'conversation_auto_resolved')`); la cuenta no tiene `reporting_timezone`, así que no hay rollups que reconstruir (el reporte del bot lee los eventos crudos).
+
+Desde ese mismo día SuporteOficialX deja en `sox_step` la última etapa del bot cuando la conversación se cierra por inactividad (antes escribía "Encerrado"), para que "Dónde abandonan" tenga datos.
 
 ## 2. Reporte del bot
 
