@@ -58,7 +58,16 @@ const appliedFilters = ref({
   rating: urlFilters.rating,
 });
 
-const agents = computed(() => store.getters['agents/getAgents']);
+// Xplus: agent bots are offered in the agent filter with a negative id, so the chips and the
+// URL keep working with numbers. A negative selection becomes `agent_bot_id` for the API.
+const toBotOption = bot => ({
+  id: -bot.id,
+  name: `${bot.name} · ${t('CSAT_REPORTS.FILTERS.AGENTS.BOT')}`,
+});
+const agents = computed(() => [
+  ...store.getters['agents/getAgents'],
+  ...store.getters['agentBots/getBots'].map(toBotOption),
+]);
 const inboxes = computed(() => store.getters['inboxes/getInboxes']);
 const teams = computed(() => store.getters['teams/getTeams']);
 
@@ -172,12 +181,12 @@ const updateURLParams = () => {
 
 const emitChange = () => {
   updateURLParams();
+  const agentId = appliedFilters.value.user_ids;
   emit('filterChange', {
     from: from.value,
     to: to.value,
-    selectedAgents: appliedFilters.value.user_ids
-      ? [{ id: appliedFilters.value.user_ids }]
-      : [],
+    selectedAgents: agentId > 0 ? [{ id: agentId }] : [],
+    selectedAgentBot: agentId < 0 ? { id: -agentId } : null,
     selectedInbox: appliedFilters.value.inbox_id
       ? { id: appliedFilters.value.inbox_id }
       : null,

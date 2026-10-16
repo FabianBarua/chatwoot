@@ -535,7 +535,8 @@
         "RATINGS": "Search ratings"
       },
       "AGENTS": {
-        "LABEL": "Agente"
+        "LABEL": "Agente",
+        "BOT": "Bot"
       },
       "INBOXES": {
         "LABEL": "Bandeja de entrada"
@@ -556,11 +557,12 @@
         "CONVERSATION": "Conversación",
         "CUSTOMER": "Customer",
         "RESPONSE": "Respuesta",
-        "HANDLED_BY": "Handled by"
+        "HANDLED_BY": "Atendido por"
       },
+      "BOT": "Bot",
       "UNKNOWN_CUSTOMER": "Unknown customer"
     },
-    "NO_AGENT": "No assigned agent",
+    "NO_AGENT": "Sin agente asignado",
     "NO_FEEDBACK": "No feedback provided",
     "METRIC": {
       "TOTAL_RESPONSES": {

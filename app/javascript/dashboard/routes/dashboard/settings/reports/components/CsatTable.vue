@@ -61,6 +61,7 @@ const tableData = computed(() => {
     id: response.id,
     contact: response.contact,
     assignedAgent: response.assigned_agent,
+    assignedAgentBot: response.assigned_agent_bot,
     rating: response.rating,
     feedbackText: response.feedback_message || '',
     conversationId: response.conversation_id,
@@ -209,6 +210,17 @@ const table = useVueTable({
                   :user="row.assignedAgent"
                   :size="28"
                 />
+                <div
+                  v-else-if="row.assignedAgentBot"
+                  class="flex items-center gap-2"
+                >
+                  <UserAvatarWithName :user="row.assignedAgentBot" :size="28" />
+                  <span
+                    class="px-1.5 py-0.5 text-xs rounded-md bg-n-alpha-2 text-n-slate-11"
+                  >
+                    {{ $t('CSAT_REPORTS.TABLE.BOT') }}
+                  </span>
+                </div>
                 <span v-else class="text-n-slate-10 text-sm italic">
                   {{ $t('CSAT_REPORTS.NO_AGENT') }}
                 </span>

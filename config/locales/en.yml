@@ -300,6 +300,7 @@ en:
         contact_phone_number: Contact Phone Number
         link_to_the_conversation: Link to the conversation
         agent_name: Agent Name
+        handled_by: Handled by
         rating: Rating
         feedback: Feedback Comment
         recorded_at: Recorded date

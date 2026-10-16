@@ -67,6 +67,22 @@ RSpec.describe 'CSAT Survey Responses API', type: :request do
         expect(response_data.size).to eq 2
       end
 
+      it 'filters csat responses by the agent bot that handled the conversation' do
+        agent_bot = create(:agent_bot, account: account)
+        bot_csat = create(:csat_survey_response, account: account, assigned_agent_bot: agent_bot)
+        create(:csat_survey_response, account: account, assigned_agent: agent)
+
+        get "/api/v1/accounts/#{account.id}/csat_survey_responses",
+            params: { agent_bot_id: agent_bot.id },
+            headers: administrator.create_new_auth_token,
+            as: :json
+
+        expect(response).to have_http_status(:success)
+        response_data = response.parsed_body
+        expect(response_data.pluck('id')).to eq([bot_csat.id])
+        expect(response_data.first['assigned_agent_bot']).to include('id' => agent_bot.id, 'name' => agent_bot.name)
+      end
+
       it 'returns csat responses even if the agent is deleted from account' do
         deleted_agent_csat = create(:csat_survey_response, account: account, assigned_agent: agent)
         deleted_agent_csat.assigned_agent.account_users.destroy_all

@@ -535,7 +535,8 @@
         "RATINGS": "Search ratings"
       },
       "AGENTS": {
-        "LABEL": "Agent"
+        "LABEL": "Agent",
+        "BOT": "Bot"
       },
       "INBOXES": {
         "LABEL": "Inbox"
@@ -558,6 +559,7 @@
         "RESPONSE": "Response",
         "HANDLED_BY": "Handled by"
       },
+      "BOT": "Bot",
       "UNKNOWN_CUSTOMER": "Unknown customer"
     },
     "NO_AGENT": "No assigned agent",

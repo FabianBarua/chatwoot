@@ -38,6 +38,7 @@ class AgentBot < ApplicationRecord
                                     dependent: :nullify,
                                     as: :ai_assignee,
                                     inverse_of: :ai_assignee
+  has_many :csat_survey_responses, foreign_key: :assigned_agent_bot_id, dependent: :nullify, inverse_of: :assigned_agent_bot
   belongs_to :account, optional: true
   enum bot_type: { webhook: 0 }
 

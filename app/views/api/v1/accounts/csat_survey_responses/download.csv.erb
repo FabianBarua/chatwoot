@@ -7,7 +7,8 @@
     I18n.t('reports.csat.headers.contact_email_address'),
     I18n.t('reports.csat.headers.contact_phone_number'),
     I18n.t('reports.csat.headers.link_to_the_conversation'),
-    I18n.t('reports.csat.headers.recorded_at')
+    I18n.t('reports.csat.headers.recorded_at'),
+    I18n.t('reports.csat.headers.handled_by')
   ]
   headers << I18n.t('reports.csat.headers.review_notes') if ChatwootApp.enterprise?
 -%>
@@ -25,7 +26,8 @@
     contact&.email.presence,
     contact&.phone_number.presence,
     conversation ? app_account_conversation_url(account_id: Current.account.id, id: conversation.display_id) : nil,
-    csat_response.created_at
+    csat_response.created_at,
+    assigned_agent&.name || csat_response.assigned_agent_bot&.name
   ]
   row << csat_response.csat_review_notes if ChatwootApp.enterprise?
 -%>

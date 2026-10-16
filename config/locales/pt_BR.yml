@@ -272,6 +272,7 @@ pt_BR:
         contact_phone_number: Telefone de contato
         link_to_the_conversation: Link para a conversa
         agent_name: Nome do Agente
+        handled_by: Atendido por
         rating: Classificação
         feedback: Comentário de Feedback
         recorded_at: Data de gravação

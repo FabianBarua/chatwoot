@@ -25,6 +25,7 @@ export default {
       from: 0,
       to: 0,
       userIds: [],
+      agentBot: null,
       inbox: null,
       team: null,
       rating: null,
@@ -40,6 +41,7 @@ export default {
         from: this.from,
         to: this.to,
         user_ids: this.userIds,
+        agent_bot_id: this.agentBot,
         inbox_id: this.inbox,
         team_id: this.team,
         rating: this.rating,
@@ -54,6 +56,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch('agents/get');
+    this.$store.dispatch('agentBots/get');
   },
   methods: {
     getAllData() {
@@ -89,6 +92,7 @@ export default {
       from,
       to,
       selectedAgents,
+      selectedAgentBot,
       selectedInbox,
       selectedTeam,
       selectedRating,
@@ -104,6 +108,7 @@ export default {
       this.from = from;
       this.to = to;
       this.userIds = selectedAgents.map(el => el.id);
+      this.agentBot = selectedAgentBot?.id;
       this.inbox = selectedInbox?.id;
       this.team = selectedTeam?.id;
       this.rating = selectedRating?.value;
