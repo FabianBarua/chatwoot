@@ -110,10 +110,12 @@ bot_outcomes.each do |outcome|
 
   started_at = outcome[:days_ago].days.ago
   # rubocop:disable Rails/SkipsModelValidations
-  conv.update_columns(created_at: started_at, custom_attributes: outcome[:attributes], cached_label_list: outcome[:labels])
+  conv.update_columns(created_at: started_at, custom_attributes: outcome[:attributes])
   conv.messages.create!(account: account, inbox: bot_inbox, message_type: :outgoing, sender: bot, created_at: started_at + 5,
                         content: "Olá #{outcome[:name].split.first}! Como posso ajudar?")
-  outcome[:events].each { |event_name, seconds| bot_event(conv.reload, event_name, seconds) }
+  # labels go through the tagging API: a plain cached_label_list is overwritten on the next save
+  conv.reload.update_labels(outcome[:labels].split(','))
+  outcome[:events].each { |event_name, seconds| bot_event(conv, event_name, seconds) }
   columns = { status: Conversation.statuses[outcome[:status]] }
   if outcome[:status] == :open
     columns[:assignee_agent_bot_id] = nil
