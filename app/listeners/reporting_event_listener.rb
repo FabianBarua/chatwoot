@@ -19,7 +19,7 @@ class ReportingEventListener < BaseListener
       event_end_time: event_end_time
     )
 
-    create_bot_resolved_event(conversation, reporting_event)
+    create_bot_resolved_event(conversation, reporting_event, auto_resolved: event.data[:auto_resolved].present?)
     reporting_event.save!
     safe_rollup(reporting_event)
   end
@@ -140,13 +140,14 @@ class ReportingEventListener < BaseListener
     reporting_event.save!
   end
 
-  def create_bot_resolved_event(conversation, reporting_event)
+  def create_bot_resolved_event(conversation, reporting_event, auto_resolved: false)
     return unless conversation.inbox.active_bot?
     # We don't want to create a bot_resolved event if there is user interaction on the conversation
     return if conversation.messages.exists?(message_type: :outgoing, sender_type: 'User')
 
     bot_resolved_event = reporting_event.dup
-    bot_resolved_event.name = 'conversation_bot_resolved'
+    # Xplus: a conversation closed by Conversations::ResolutionJob was abandoned, not resolved by the bot
+    bot_resolved_event.name = auto_resolved ? 'conversation_auto_resolved' : 'conversation_bot_resolved'
     bot_resolved_event.save!
     safe_rollup(bot_resolved_event)
   end

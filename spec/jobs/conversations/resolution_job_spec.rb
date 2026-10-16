@@ -72,6 +72,15 @@ RSpec.describe Conversations::ResolutionJob do
     expect(resolvable_conversation.reload.status).to eq('resolved')
   end
 
+  it 'marks the resolution as automatic so the reporting events can tell inactivity apart' do
+    account.update(auto_resolve_after: 14_400, auto_resolve_ignore_waiting: false) # 10 days in minutes
+    conversation.update(last_activity_at: 13.days.ago)
+
+    expect { described_class.perform_now(account: account) }
+      .to have_enqueued_job(EventDispatcherJob)
+      .with(Conversation::CONVERSATION_RESOLVED, anything, hash_including(conversation: conversation, auto_resolved: true))
+  end
+
   it 'adds a label after resolution' do
     account.update(auto_resolve_label: 'auto-resolved', auto_resolve_after: 14_400)
     conversation = create(:conversation, account: account, last_activity_at: 13.days.ago, waiting_since: 13.days.ago)

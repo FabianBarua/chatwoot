@@ -91,6 +91,21 @@ describe ReportingEventListener do
         listener.conversation_resolved(event)
         expect(account.reporting_events.where(name: 'conversation_bot_resolved').count).to be 0
       end
+
+      it 'creates a conversation_auto_resolved event instead when the inactivity job resolved it' do
+        event = Events::Base.new('conversation.resolved', Time.zone.now, conversation: bot_resolved_conversation, auto_resolved: true)
+        listener.conversation_resolved(event)
+        expect(account.reporting_events.where(name: 'conversation_bot_resolved').count).to be 0
+        expect(account.reporting_events.where(name: 'conversation_auto_resolved').count).to be 1
+        expect(account.reporting_events.where(name: 'conversation_resolved').count).to be 1
+      end
+
+      it 'does not create a conversation_auto_resolved event when a human took part before the inactivity job' do
+        create(:message, message_type: 'outgoing', account: account, inbox: agent_bot_inbox, conversation: bot_resolved_conversation)
+        event = Events::Base.new('conversation.resolved', Time.zone.now, conversation: bot_resolved_conversation, auto_resolved: true)
+        listener.conversation_resolved(event)
+        expect(account.reporting_events.where(name: 'conversation_auto_resolved').count).to be 0
+      end
     end
   end
 

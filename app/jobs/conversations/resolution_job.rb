@@ -10,6 +10,7 @@ class Conversations::ResolutionJob < ApplicationJob
       ::MessageTemplates::Template::AutoResolve.new(conversation: conversation).perform if account.auto_resolve_message.present?
       conversation.add_labels(account.auto_resolve_label) if account.auto_resolve_label.present?
       # toggle_status would move a pending conversation to open, not resolved
+      conversation.auto_resolved = true
       conversation.update(status: :resolved)
     end
   end

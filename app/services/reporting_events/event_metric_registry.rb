@@ -20,6 +20,10 @@ module ReportingEvents::EventMetricRegistry
     ].freeze,
     conversation_bot_handoff: [
       Metric.new(rollup_metric: :bot_handoffs_count, payload_kind: :count)
+    ].freeze,
+    # Xplus: bot conversation closed by the inactivity job (Conversations::ResolutionJob)
+    conversation_auto_resolved: [
+      Metric.new(rollup_metric: :auto_resolutions_count, payload_kind: :count)
     ].freeze
   }.freeze
 

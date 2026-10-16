@@ -20,7 +20,8 @@ module ReportingEvents::MetricRegistry
     'first_response' => ->(values) { { first_response: duration_metric(values) } },
     'reply_time' => ->(values) { { reply_time: duration_metric(values) } },
     'conversation_bot_resolved' => ->(values) { { bot_resolutions_count: count_metric(values[:count]) } },
-    'conversation_bot_handoff' => ->(values) { { bot_handoffs_count: count_metric(values[:count]) } }
+    'conversation_bot_handoff' => ->(values) { { bot_handoffs_count: count_metric(values[:count]) } },
+    'conversation_auto_resolved' => ->(values) { { auto_resolutions_count: count_metric(values[:count]) } }
   }.freeze
 
   # Describes which report metrics are supported and how each one is sourced and aggregated.
@@ -34,7 +35,8 @@ module ReportingEvents::MetricRegistry
     resolutions_count: { raw_event_name: :conversation_resolved, rollup_metric: :resolutions_count, aggregate: :count }.freeze,
     bot_resolutions_count: { raw_event_name: :conversation_bot_resolved, rollup_metric: :bot_resolutions_count, aggregate: :count }.freeze,
     bot_handoffs_count: { raw_event_name: :conversation_bot_handoff, rollup_metric: :bot_handoffs_count, aggregate: :count,
-                          raw_count_strategy: :distinct_conversation }.freeze
+                          raw_count_strategy: :distinct_conversation }.freeze,
+    auto_resolutions_count: { raw_event_name: :conversation_auto_resolved, rollup_metric: :auto_resolutions_count, aggregate: :count }.freeze
   }.freeze
 
   module_function

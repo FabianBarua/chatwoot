@@ -10,6 +10,7 @@ RSpec.describe ReportingEvents::EventMetricRegistry do
           reply_time
           conversation_bot_resolved
           conversation_bot_handoff
+          conversation_auto_resolved
         ]
       )
     end
@@ -74,6 +75,18 @@ RSpec.describe ReportingEvents::EventMetricRegistry do
 
       expect(described_class.metrics_for(event)).to eq(
         bot_handoffs_count: {
+          count: 1,
+          sum_value: 0,
+          sum_value_business_hours: 0
+        }
+      )
+    end
+
+    it 'returns the emitted rollup metrics for conversation_auto_resolved' do
+      event = instance_double(ReportingEvent, name: 'conversation_auto_resolved')
+
+      expect(described_class.metrics_for(event)).to eq(
+        auto_resolutions_count: {
           count: 1,
           sum_value: 0,
           sum_value_business_hours: 0

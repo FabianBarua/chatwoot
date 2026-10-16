@@ -88,6 +88,13 @@ module Reports::ReportMetricRegistry
       raw_event_name: :conversation_bot_handoff,
       rollup_metric: :bot_handoffs_count,
       raw_count_strategy: :distinct_conversation
+    ),
+    # Xplus: bot conversations closed by the inactivity job, kept apart from bot_resolutions_count
+    auto_resolutions_count: Metric.new(
+      name: :auto_resolutions_count,
+      aggregate: :count,
+      raw_event_name: :conversation_auto_resolved,
+      rollup_metric: :auto_resolutions_count
     )
   }.freeze
 

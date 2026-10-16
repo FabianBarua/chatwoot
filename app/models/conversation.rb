@@ -77,6 +77,10 @@ class Conversation < ApplicationRecord
   validates :account_id, presence: true
   validates :inbox_id, presence: true
   validates :contact_id, presence: true
+  # Xplus: set by Conversations::ResolutionJob before resolving, so the reporting listener can tell
+  # "closed by inactivity" apart from "resolved by the bot"
+  attr_accessor :auto_resolved
+
   before_validation :validate_additional_attributes
   before_validation :reset_agent_bot_when_assignee_present
   validates :additional_attributes, jsonb_attributes_length: true
@@ -391,9 +395,11 @@ class Conversation < ApplicationRecord
   end
 
   def dispatcher_dispatch(event_name, changed_attributes = nil)
-    Rails.configuration.dispatcher.dispatch(event_name, Time.zone.now, conversation: self, notifiable_assignee_change: notifiable_assignee_change?,
-                                                                       changed_attributes: changed_attributes,
-                                                                       performed_by: Current.executed_by)
+    data = { conversation: self, notifiable_assignee_change: notifiable_assignee_change?, changed_attributes: changed_attributes,
+             performed_by: Current.executed_by }
+    # Xplus: the dispatch is asynchronous, so the inactivity mark has to travel with the event
+    data[:auto_resolved] = true if auto_resolved
+    Rails.configuration.dispatcher.dispatch(event_name, Time.zone.now, data)
   end
 
   def set_unread_count_deletion_data
