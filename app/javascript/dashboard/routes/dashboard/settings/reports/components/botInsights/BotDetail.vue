@@ -202,8 +202,9 @@ const messagesChart = computed(() => ({
   ],
 }));
 
+// Plain hour numbers: 24 "00h" labels get truncated on the bar chart axis
 const byHourChart = computed(() => ({
-  categories: HOURS.map(hourLabel),
+  categories: HOURS.map(String),
   series: [
     {
       id: 'conversations',
