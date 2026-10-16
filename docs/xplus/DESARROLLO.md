@@ -11,6 +11,7 @@ Guía para trabajar sobre la edición Xplus de Chatwoot: desde editar el código
 - **Edición enterprise:** el plan está fijo en `enterprise` (`lib/chatwoot_hub.rb`) y todas las funciones premium vienen activadas. No hace falta montar ningún initializer extra en el compose.
 - **Pestaña Bot:** la lista de conversaciones tiene una pestaña con las conversaciones que lleva un bot (estado `pending`), pensada para SuporteOficialX. Detalle en `docs/xplus/pestana-bot.md`.
 - **Asignación al conectarse:** cuando un agente se pone online (o vuelve a estar presente), se reparten las conversaciones que esperaban en sus bandejas. Detalle en `docs/xplus/asignacion-al-conectarse.md`.
+- **Reporte del bot y CSAT por bot:** Informes → Bot con la estructura del reporte de agentes, un evento `conversation_auto_resolved` que separa inactividad de resolución del bot, y el CSAT atribuido al agent bot. Detalle en `docs/xplus/relatorio-bot.md`.
 
 ## Requisitos en la PC
 
@@ -53,6 +54,12 @@ Backend (Ruby dentro de Docker). La imagen de desarrollo se compila una sola vez
 
 ```bash
 docker build -f docker/Dockerfile --build-arg RAILS_ENV=development --build-arg BUNDLE_WITHOUT='' --build-arg EXECJS_RUNTIME=Node -t chatwoot:xp-dev .
+```
+
+Si esa compilación completa tumba Docker Desktop (la gem `grpc`), la imagen de desarrollo también se puede armar encima de la de producción local: ya trae gcc y las gems de producción, así que solo instala las de desarrollo y test (unos minutos).
+
+```bash
+docker/xplus/build-dev.sh
 ```
 
 ```bash
