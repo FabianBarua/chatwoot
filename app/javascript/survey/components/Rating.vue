@@ -1,6 +1,7 @@
 <script>
 import { CSAT_RATINGS } from 'shared/constants/messages';
 
+// Xplus: five fixed columns so every rating fits on a phone, each with its name under the emoji
 export default {
   props: {
     selectedRating: {
@@ -20,13 +21,20 @@ export default {
   },
 
   methods: {
-    buttonClass(rating) {
+    isSelected(rating) {
+      return rating.value === this.selectedRating;
+    },
+    emojiClass(rating) {
       return [
-        { selected: rating.value === this.selectedRating },
+        { selected: this.isSelected(rating) },
         { disabled: this.isDisabled },
-        { hover: this.isDisabled },
-        'emoji-button shadow-none text-3xl lg:text-4xl outline-none mr-8',
+        'emoji text-3xl leading-none lg:text-4xl',
       ];
+    },
+    ratingLabel(rating) {
+      return this.$t(
+        `SURVEY.RATINGS.${rating.translationKey.split('.').pop()}`
+      );
     },
     onClick(rating) {
       if (this.isDisabled) return;
@@ -38,35 +46,50 @@ export default {
 
 <template>
   <div class="customer-satisfcation mb-2">
-    <div class="ratings flex py-5 px-0">
+    <div class="ratings grid grid-cols-5 gap-1 py-5">
       <button
         v-for="rating in ratings"
         :key="rating.key"
-        :class="buttonClass(rating)"
+        type="button"
+        class="flex flex-col items-center min-w-0 gap-1.5 shadow-none outline-none group"
+        :class="{ 'cursor-default pointer-events-none': isDisabled }"
+        :aria-pressed="isSelected(rating)"
         @click="onClick(rating)"
       >
-        {{ rating.emoji }}
+        <span :class="emojiClass(rating)">{{ rating.emoji }}</span>
+        <span
+          class="text-[11px] leading-tight text-center break-words"
+          :class="
+            isSelected(rating)
+              ? 'font-medium text-n-slate-12'
+              : 'text-n-slate-11'
+          "
+        >
+          {{ ratingLabel(rating) }}
+        </span>
       </button>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.emoji-button {
+.emoji {
   filter: grayscale(100%);
+  transition: transform 300ms;
+
   &.selected,
-  &:hover,
-  &:focus,
-  &:active {
+  .group:hover &,
+  .group:focus-visible & {
     filter: grayscale(0%);
-    transform: scale(1.32);
-    transition: transform 300ms;
+    transform: scale(1.2);
   }
 
   &.disabled {
-    cursor: default;
     opacity: 0.5;
-    pointer-events: none;
+  }
+
+  &.disabled.selected {
+    opacity: 1;
   }
 }
 </style>

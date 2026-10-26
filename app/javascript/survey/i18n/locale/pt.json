@@ -5,6 +5,13 @@
       "LABEL": "Avalie a sua conversa",
       "SUCCESS_MESSAGE": "Obrigado pela sua Avaliação"
     },
+    "RATINGS": {
+      "POOR": "Ruim",
+      "FAIR": "Razoável",
+      "AVERAGE": "Médio",
+      "GOOD": "Bom",
+      "EXCELLENT": "Excelente"
+    },
     "REASONS": {
       "LABEL": "Lamentamos. Pode dizer-nos o que correu mal?",
       "HINT": "Opcional: escolha a opção que melhor o descreve.",

@@ -208,7 +208,7 @@ export default {
     <div
       class="flex flex-col w-full h-full bg-n-solid-1 rounded-lg border border-solid border-n-weak shadow-md lg:w-2/5 lg:h-auto"
     >
-      <div class="w-full px-12 pt-12 pb-6 m-auto my-0">
+      <div class="w-full px-6 pt-8 pb-6 m-auto my-0 sm:px-12 sm:pt-12">
         <img v-if="logo" :src="logo" alt="Chatwoot logo" class="mb-6 logo" />
         <div
           v-if="!isRatingSubmitted"

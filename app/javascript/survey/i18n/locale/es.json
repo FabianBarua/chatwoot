@@ -5,6 +5,13 @@
       "LABEL": "Califica tu conversación",
       "SUCCESS_MESSAGE": "Gracias por enviar la valoración"
     },
+    "RATINGS": {
+      "POOR": "Malo",
+      "FAIR": "Regular",
+      "AVERAGE": "Normal",
+      "GOOD": "Bueno",
+      "EXCELLENT": "Excelente"
+    },
     "REASONS": {
       "LABEL": "Lamentamos la experiencia. ¿Nos contás qué salió mal?",
       "HINT": "Opcional: elegí la opción que mejor lo describa.",

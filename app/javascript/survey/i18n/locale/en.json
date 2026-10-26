@@ -5,6 +5,13 @@
       "LABEL": "Rate your conversation",
       "SUCCESS_MESSAGE": "Thank you for submitting the rating"
     },
+    "RATINGS": {
+      "POOR": "Poor",
+      "FAIR": "Fair",
+      "AVERAGE": "Average",
+      "GOOD": "Good",
+      "EXCELLENT": "Excellent"
+    },
     "REASONS": {
       "LABEL": "Sorry about that. Would you tell us what went wrong?",
       "HINT": "Optional: pick the option that best describes it.",
