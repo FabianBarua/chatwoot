@@ -4,6 +4,7 @@ import Spinner from 'shared/components/Spinner.vue';
 import { CSAT_RATINGS, CSAT_DISPLAY_TYPES } from 'shared/constants/messages';
 import FluentIcon from 'shared/components/FluentIcon/Index.vue';
 import StarRating from 'shared/components/StarRating.vue';
+import CsatReasons from 'shared/components/CsatReasons.vue';
 import { useMessageFormatter } from 'shared/composables/useMessageFormatter';
 import { getContrastingTextColor } from '@chatwoot/utils';
 
@@ -12,6 +13,7 @@ export default {
     Spinner,
     FluentIcon,
     StarRating,
+    CsatReasons,
   },
   props: {
     messageContentAttributes: {
@@ -40,6 +42,7 @@ export default {
       email: '',
       ratings: CSAT_RATINGS,
       selectedRating: null,
+      selectedReason: null,
       isUpdating: false,
       feedback: '',
     };
@@ -75,14 +78,37 @@ export default {
     isStarType() {
       return this.displayType === CSAT_DISPLAY_TYPES.STAR;
     },
+    // Xplus: reasons offered after a low rating, from the inbox config or the widget's default list
+    reasonOptions() {
+      const configured = this.messageContentAttributes?.reasons;
+      if (Array.isArray(configured)) return configured;
+      const defaults = this.$tm('CSAT.REASONS_DEFAULTS');
+      const list =
+        Array.isArray(defaults) && defaults.length
+          ? defaults
+          : this.$i18n.getLocaleMessage('en').CSAT.REASONS_DEFAULTS;
+      return list.map(item => this.$rt(item));
+    },
+    reasonsMaxRating() {
+      return this.messageContentAttributes?.reasons_max_rating || 2;
+    },
+    // Right after the click, before the updated message comes back over the socket
+    shouldShowReasons() {
+      return (
+        !!this.selectedRating &&
+        this.selectedRating <= this.reasonsMaxRating &&
+        this.reasonOptions.length > 0
+      );
+    },
   },
 
   mounted() {
     if (this.isRatingSubmitted) {
       const {
-        csat_survey_response: { rating, feedback_message },
+        csat_survey_response: { rating, feedback_message, reason },
       } = this.messageContentAttributes;
       this.selectedRating = rating;
+      this.selectedReason = reason || null;
       this.feedback = feedback_message;
     }
   },
@@ -105,6 +131,7 @@ export default {
           submittedValues: {
             csat_survey_response: {
               rating: this.selectedRating,
+              reason: this.selectedReason,
               feedback_message: this.feedback,
             },
           },
@@ -118,13 +145,18 @@ export default {
     },
 
     selectRating(rating) {
-      if (this.isFeedbackSubmitted || this.isUpdating) return;
-      this.selectedRating = rating.value;
-      this.onSubmit();
+      this.selectStarRating(rating.value);
     },
     selectStarRating(value) {
       if (this.isFeedbackSubmitted || this.isUpdating) return;
       this.selectedRating = value;
+      // A reason only makes sense for the low rating it was picked for
+      if (value > this.reasonsMaxRating) this.selectedReason = null;
+      this.onSubmit();
+    },
+    selectReason(reason) {
+      if (this.isFeedbackSubmitted || this.isUpdating) return;
+      this.selectedReason = reason === this.selectedReason ? null : reason;
       this.onSubmit();
     },
   },
@@ -156,6 +188,19 @@ export default {
       :is-disabled="isFeedbackSubmitted || isUpdating"
       @select-rating="selectStarRating"
     />
+    <div v-if="shouldShowReasons" class="px-2.5 pb-4">
+      <p class="mb-2 text-sm text-center text-n-slate-11">
+        {{ $t('CSAT.REASONS_TITLE') }}
+      </p>
+      <CsatReasons
+        class="justify-center"
+        :reasons="reasonOptions"
+        :selected-reason="selectedReason"
+        :is-disabled="isFeedbackSubmitted || isUpdating"
+        :accent-color="widgetColor"
+        @select-reason="selectReason"
+      />
+    </div>
     <form
       v-if="!isFeedbackSubmitted"
       class="feedback-form flex"

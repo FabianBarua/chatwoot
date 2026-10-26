@@ -1,6 +1,7 @@
 json.id resource.id
 json.rating resource.rating
 json.feedback_message resource.feedback_message
+json.reason resource.reason
 json.csat_review_notes resource.csat_review_notes
 json.review_notes_updated_at resource.review_notes_updated_at&.to_i
 if resource.review_notes_updated_by

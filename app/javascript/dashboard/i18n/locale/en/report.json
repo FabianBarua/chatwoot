@@ -553,6 +553,7 @@
         "CONTACT_NAME": "Contact",
         "AGENT_NAME": "Agent",
         "RATING": "Rating",
+        "REASON": "Reason",
         "FEEDBACK_TEXT": "Feedback comment",
         "CONVERSATION": "Conversation",
         "CUSTOMER": "Customer",
@@ -564,6 +565,7 @@
     },
     "NO_AGENT": "No assigned agent",
     "NO_FEEDBACK": "No feedback provided",
+    "NO_REASON": "No reason given",
     "METRIC": {
       "TOTAL_RESPONSES": {
         "LABEL": "Total responses",
@@ -829,6 +831,8 @@
     "LOADING": "Loading report...",
     "EMPTY_CHART": "No data in this period",
     "NO_CSAT": "No ratings in this period",
+    "NO_REASON": "Without a reason",
+    "REASONS_COUNT": "{count} rated without a reason",
     "VS_PREVIOUS": "Compared with the previous period",
     "ROLES": {
       "administrator": "Administrator",
@@ -893,7 +897,9 @@
       "LABELS": "Top labels",
       "LABELS_DESC": "Labels of the conversations they replied to.",
       "INBOXES": "Inboxes",
-      "INBOXES_DESC": "Where the conversations they replied to came from."
+      "INBOXES_DESC": "Where the conversations they replied to came from.",
+      "REASONS": "Reasons for low ratings",
+      "REASONS_DESC": "What customers picked after a low rating."
     },
     "RANKING": {
       "TITLE": "Agent ranking",
@@ -927,6 +933,31 @@
       "IN_ATTENTION": "Being handled now",
       "EMPTY": "No conversations assigned in this period",
       "WAITING_NOTE": "{count} waiting"
+    },
+    "CONVERSATIONS": {
+      "TITLE": "Resolved conversations",
+      "DESCRIPTION": "Conversations the agent resolved in the period, with the rating and reason the customer left.",
+      "FILTER_RATING": "Rating",
+      "FILTER_REASON": "Reason",
+      "ALL_RATINGS": "All ratings",
+      "NO_RATING": "Not rated",
+      "ALL_REASONS": "All reasons",
+      "NO_REASON": "No reason",
+      "COLUMNS": {
+        "CONVERSATION": "Conversation",
+        "INBOX": "Inbox",
+        "RESOLVED_AT": "Resolved",
+        "RATING": "Rating",
+        "REASON": "Reason",
+        "FEEDBACK": "Comment"
+      },
+      "NOT_RATED": "Not rated",
+      "EMPTY": "No resolved conversations match these filters",
+      "LOADING": "Loading conversations...",
+      "SHOWING": "{from}-{to} of {total}",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "UNKNOWN_CONTACT": "Unknown contact"
     }
   }
 }

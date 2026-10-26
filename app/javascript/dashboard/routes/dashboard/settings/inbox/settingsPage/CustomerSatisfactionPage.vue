@@ -5,7 +5,7 @@ import { useAlert } from 'dashboard/composables';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useInbox } from 'dashboard/composables/useInbox';
 import { useCaptain } from 'dashboard/composables/useCaptain';
-import { CSAT_DISPLAY_TYPES } from 'shared/constants/messages';
+import { CSAT_DISPLAY_TYPES, CSAT_RATINGS } from 'shared/constants/messages';
 
 import Icon from 'dashboard/components-next/icon/Icon.vue';
 import WithLabel from 'v3/components/Form/WithLabel.vue';
@@ -24,7 +24,7 @@ const props = defineProps({
   inbox: { type: Object, required: true },
 });
 
-const { t } = useI18n();
+const { t, tm, rt, getLocaleMessage } = useI18n();
 const store = useStore();
 const labels = useMapGetter('labels/getLabels');
 const { captainEnabled } = useCaptain();
@@ -44,6 +44,9 @@ const utilityAnalysisResult = ref(null);
 const selectedLabelValues = ref([]);
 const currentLabel = ref('');
 
+// Xplus: a rating of this value or lower asks the customer for one of the configured reasons
+const DEFAULT_REASONS_MAX_RATING = 2;
+
 const state = reactive({
   csatSurveyEnabled: false,
   displayType: 'emoji',
@@ -51,7 +54,45 @@ const state = reactive({
   templateButtonText: 'Please rate us',
   surveyRuleOperator: 'contains',
   templateLanguage: 'en',
+  reasonsMaxRating: DEFAULT_REASONS_MAX_RATING,
 });
+
+const reasons = ref([]);
+const newReason = ref('');
+
+// Default list in the dashboard language, English when the language has none
+const defaultReasons = () => {
+  const defaults = tm('INBOX_MGMT.CSAT.REASONS.DEFAULTS');
+  const list =
+    Array.isArray(defaults) && defaults.length
+      ? defaults
+      : getLocaleMessage('en').INBOX_MGMT.CSAT.REASONS.DEFAULTS;
+  return list.map(rt);
+};
+
+const ratingOptions = computed(() =>
+  CSAT_RATINGS.map(rating => ({
+    value: rating.value,
+    label: t(rating.translationKey),
+  }))
+);
+
+const reasonsMaxRatingLabel = computed(
+  () =>
+    ratingOptions.value.find(option => option.value === state.reasonsMaxRating)
+      ?.label || ''
+);
+
+const addReason = () => {
+  const reason = newReason.value.trim();
+  if (!reason || reasons.value.includes(reason)) return;
+  reasons.value.push(reason);
+  newReason.value = '';
+};
+
+const removeReason = reason => {
+  reasons.value = reasons.value.filter(item => item !== reason);
+};
 
 const templateStatus = ref(null);
 const templateLoading = ref(false);
@@ -155,6 +196,8 @@ const initializeState = () => {
     button_text: buttonText = 'Please rate us',
     language = 'en',
     survey_rules: surveyRules = {},
+    reasons: configuredReasons,
+    reasons_max_rating: reasonsMaxRating = DEFAULT_REASONS_MAX_RATING,
   } = csat_config;
 
   state.displayType = displayType;
@@ -162,6 +205,11 @@ const initializeState = () => {
   state.templateButtonText = buttonText;
   state.templateLanguage = language;
   state.surveyRuleOperator = surveyRules.operator || 'contains';
+  state.reasonsMaxRating = reasonsMaxRating;
+  // An inbox that never configured reasons shows the default list the survey already uses
+  reasons.value = Array.isArray(configuredReasons)
+    ? [...configuredReasons]
+    : defaultReasons();
 
   selectedLabelValues.value = Array.isArray(surveyRules.values)
     ? [...surveyRules.values]
@@ -432,6 +480,8 @@ const performSave = async () => {
         operator: state.surveyRuleOperator,
         values: selectedLabelValues.value,
       },
+      reasons: reasons.value,
+      reasons_max_rating: state.reasonsMaxRating,
     };
 
     // Use new template data if created, otherwise preserve existing template information
@@ -715,6 +765,65 @@ const handleConfirmTemplateUpdate = async () => {
                   @update:model-value="handleLabelSelect"
                 />
               </span>
+            </div>
+          </WithLabel>
+          <WithLabel
+            :label="$t('INBOX_MGMT.CSAT.REASONS.LABEL')"
+            name="csat_reasons"
+          >
+            <div class="flex flex-col gap-3 w-full">
+              <p class="text-sm text-n-slate-11">
+                {{
+                  $t('INBOX_MGMT.CSAT.REASONS.DESCRIPTION', {
+                    rating: reasonsMaxRatingLabel,
+                  })
+                }}
+              </p>
+              <span
+                class="inline-flex flex-wrap gap-1.5 items-center text-sm text-n-slate-12"
+              >
+                {{ $t('INBOX_MGMT.CSAT.REASONS.MAX_RATING_LABEL') }}
+                <FilterSelect
+                  v-model="state.reasonsMaxRating"
+                  variant="faded"
+                  :options="ratingOptions"
+                  class="inline-flex shrink-0"
+                />
+                {{ $t('INBOX_MGMT.CSAT.REASONS.MAX_RATING_SUFFIX') }}
+              </span>
+              <div v-if="reasons.length" class="flex flex-wrap gap-2">
+                <NextButton
+                  v-for="reason in reasons"
+                  :key="reason"
+                  sm
+                  faded
+                  slate
+                  trailing-icon
+                  :label="reason"
+                  icon="i-lucide-x"
+                  class="inline-flex shrink-0"
+                  @click="removeReason(reason)"
+                />
+              </div>
+              <p v-else class="text-sm italic text-n-slate-11">
+                {{ $t('INBOX_MGMT.CSAT.REASONS.EMPTY') }}
+              </p>
+              <div class="flex gap-2 items-start w-full max-w-md">
+                <Input
+                  v-model="newReason"
+                  :placeholder="$t('INBOX_MGMT.CSAT.REASONS.INPUT_PLACEHOLDER')"
+                  class="flex-1"
+                  @enter="addReason"
+                />
+                <NextButton
+                  faded
+                  slate
+                  icon="i-lucide-plus"
+                  :label="$t('INBOX_MGMT.CSAT.REASONS.ADD')"
+                  :disabled="!newReason.trim()"
+                  @click="addReason"
+                />
+              </div>
             </div>
           </WithLabel>
           <p class="text-sm italic text-n-slate-11">

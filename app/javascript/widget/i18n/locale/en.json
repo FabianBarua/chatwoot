@@ -114,7 +114,15 @@
   "CSAT": {
     "TITLE": "Rate your conversation",
     "SUBMITTED_TITLE": "Thank you for submitting the rating",
-    "PLACEHOLDER": "Tell us more..."
+    "PLACEHOLDER": "Tell us more...",
+    "REASONS_TITLE": "Sorry about that. Would you tell us what went wrong?",
+    "REASONS_DEFAULTS": [
+      "Slow to respond",
+      "My problem was not solved",
+      "Unfriendly service",
+      "Confusing or wrong information",
+      "Other"
+    ]
   },
   "EMAIL_TRANSCRIPT": {
     "BUTTON_TEXT": "Request a conversation transcript",

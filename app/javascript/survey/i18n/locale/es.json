@@ -5,6 +5,17 @@
       "LABEL": "Califica tu conversación",
       "SUCCESS_MESSAGE": "Gracias por enviar la valoración"
     },
+    "REASONS": {
+      "LABEL": "Lamentamos la experiencia. ¿Nos contás qué salió mal?",
+      "HINT": "Opcional: elegí la opción que mejor lo describa.",
+      "DEFAULTS": [
+        "Demora en responder",
+        "No resolvieron mi problema",
+        "Atención poco amable",
+        "Información confusa o incorrecta",
+        "Otro"
+      ]
+    },
     "FEEDBACK": {
       "LABEL": "¿Tienes alguna idea que te gustaría compartir?",
       "PLACEHOLDER": "Tus comentarios (opcional)",

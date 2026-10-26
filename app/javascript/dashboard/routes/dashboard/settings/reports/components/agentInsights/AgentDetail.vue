@@ -12,6 +12,7 @@ import WorkloadPanel from './WorkloadPanel.vue';
 import TabBar from 'dashboard/components-next/tabbar/TabBar.vue';
 import PresenceTimeline from './PresenceTimeline.vue';
 import ChartLegend from './ChartLegend.vue';
+import AgentConversationsPanel from './AgentConversationsPanel.vue';
 import {
   BAR_CHART_CLASS,
   COLORS,
@@ -31,6 +32,8 @@ import {
 const props = defineProps({
   insight: { type: Object, default: null },
   isLoading: { type: Boolean, default: false },
+  // { since, until } in unix seconds, for the resolved conversations list
+  range: { type: Object, default: () => ({ since: 0, until: 0 }) },
 });
 
 const { t, locale } = useI18n();
@@ -319,6 +322,11 @@ const barList = items => {
 };
 const labels = computed(() => barList(props.insight?.labels || []));
 const inboxes = computed(() => barList(props.insight?.inboxes || []));
+// Xplus: why customers rated low, one bar per reason
+const csatReasons = computed(() => csat.value.reasons || []);
+const reasons = computed(() =>
+  barList(csatReasons.value.map(item => ({ ...item, label: item.reason })))
+);
 </script>
 
 <template>
@@ -573,9 +581,20 @@ const inboxes = computed(() => barList(props.insight?.inboxes || []));
           </p>
         </InsightPanel>
       </div>
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <AgentConversationsPanel
+        :agent-id="agent.id"
+        :since="range.since"
+        :until="range.until"
+        :reasons="csatReasons"
+      />
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <InsightPanel
           v-for="list in [
+            {
+              key: 'REASONS',
+              items: reasons,
+              icon: 'i-lucide-message-square-warning',
+            },
             { key: 'LABELS', items: labels, icon: 'i-lucide-tag' },
             { key: 'INBOXES', items: inboxes, icon: 'i-lucide-inbox' },
           ]"
@@ -601,7 +620,10 @@ const inboxes = computed(() => barList(props.insight?.inboxes || []));
               </div>
               <div class="h-1.5 rounded-full bg-n-alpha-2">
                 <div
-                  class="h-full rounded-full bg-n-blue-9"
+                  class="h-full rounded-full"
+                  :class="
+                    list.key === 'REASONS' ? 'bg-n-ruby-9' : 'bg-n-blue-9'
+                  "
                   :style="{ width: `${item.width}%` }"
                 />
               </div>
@@ -609,6 +631,16 @@ const inboxes = computed(() => barList(props.insight?.inboxes || []));
           </ul>
           <p v-else class="py-10 text-sm text-center text-n-slate-11">
             {{ $t('AGENT_INSIGHTS.EMPTY_CHART') }}
+          </p>
+          <p
+            v-if="list.key === 'REASONS' && csat.without_reason_count"
+            class="pt-3 mt-3 text-xs border-t border-n-weak text-n-slate-11"
+          >
+            {{
+              $t('AGENT_INSIGHTS.REASONS_COUNT', {
+                count: formatCount(csat.without_reason_count),
+              })
+            }}
           </p>
         </InsightPanel>
       </div>

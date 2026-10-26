@@ -553,6 +553,7 @@
         "CONTACT_NAME": "Contacto",
         "AGENT_NAME": "Agente",
         "RATING": "Calificación",
+        "REASON": "Motivo",
         "FEEDBACK_TEXT": "Realimentacion de Comentario",
         "CONVERSATION": "Conversación",
         "CUSTOMER": "Customer",
@@ -564,6 +565,7 @@
     },
     "NO_AGENT": "Sin agente asignado",
     "NO_FEEDBACK": "No feedback provided",
+    "NO_REASON": "Sin motivo",
     "METRIC": {
       "TOTAL_RESPONSES": {
         "LABEL": "Total de respuestas",
@@ -829,6 +831,8 @@
     "LOADING": "Cargando reporte...",
     "EMPTY_CHART": "Sin datos en este período",
     "NO_CSAT": "Sin calificaciones en este período",
+    "NO_REASON": "Sin motivo",
+    "REASONS_COUNT": "{count} calificaron sin motivo",
     "VS_PREVIOUS": "Comparado con el período anterior",
     "ROLES": {
       "administrator": "Administrador",
@@ -893,7 +897,9 @@
       "LABELS": "Etiquetas principales",
       "LABELS_DESC": "Etiquetas de las conversaciones que respondió.",
       "INBOXES": "Bandejas",
-      "INBOXES_DESC": "De dónde vinieron las conversaciones que respondió."
+      "INBOXES_DESC": "De dónde vinieron las conversaciones que respondió.",
+      "REASONS": "Motivos de las calificaciones bajas",
+      "REASONS_DESC": "Lo que eligieron los clientes después de una calificación baja."
     },
     "RANKING": {
       "TITLE": "Ranking de agentes",
@@ -927,6 +933,31 @@
       "IN_ATTENTION": "En atención ahora",
       "EMPTY": "Sin conversaciones atribuidas en este período",
       "WAITING_NOTE": "{count} esperando"
+    },
+    "CONVERSATIONS": {
+      "TITLE": "Conversaciones cerradas",
+      "DESCRIPTION": "Conversaciones que el agente resolvió en el período, con la calificación y el motivo que dejó el cliente.",
+      "FILTER_RATING": "Calificación",
+      "FILTER_REASON": "Motivo",
+      "ALL_RATINGS": "Todas las calificaciones",
+      "NO_RATING": "Sin calificación",
+      "ALL_REASONS": "Todos los motivos",
+      "NO_REASON": "Sin motivo",
+      "COLUMNS": {
+        "CONVERSATION": "Conversación",
+        "INBOX": "Bandeja",
+        "RESOLVED_AT": "Cerrada",
+        "RATING": "Calificación",
+        "REASON": "Motivo",
+        "FEEDBACK": "Comentario"
+      },
+      "NOT_RATED": "Sin calificación",
+      "EMPTY": "Ninguna conversación cerrada coincide con estos filtros",
+      "LOADING": "Cargando conversaciones...",
+      "SHOWING": "{from}-{to} de {total}",
+      "PREVIOUS": "Anterior",
+      "NEXT": "Siguiente",
+      "UNKNOWN_CONTACT": "Contacto desconocido"
     }
   }
 }

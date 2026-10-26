@@ -114,7 +114,15 @@
   "CSAT": {
     "TITLE": "Califica tu conversación",
     "SUBMITTED_TITLE": "Gracias por enviar la valoración",
-    "PLACEHOLDER": "Cuéntanos más..."
+    "PLACEHOLDER": "Cuéntanos más...",
+    "REASONS_TITLE": "Lamentamos la experiencia. ¿Nos contás qué salió mal?",
+    "REASONS_DEFAULTS": [
+      "Demora en responder",
+      "No resolvieron mi problema",
+      "Atención poco amable",
+      "Información confusa o incorrecta",
+      "Otro"
+    ]
   },
   "EMAIL_TRANSCRIPT": {
     "BUTTON_TEXT": "Enviar transcripción de la conversación",

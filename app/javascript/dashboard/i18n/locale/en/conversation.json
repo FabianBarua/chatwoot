@@ -98,6 +98,7 @@
     "RESPONSE": "Response",
     "RATING_TITLE": "Rating",
     "FEEDBACK_TITLE": "Feedback",
+    "REASON_TITLE": "Reason",
     "REPLY_MESSAGE_NOT_FOUND": "Message not available",
     "CAPTAIN_GENERATION": {
       "TITLE": "How was this reply generated?",

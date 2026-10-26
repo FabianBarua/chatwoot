@@ -97,9 +97,31 @@ RSpec.describe 'Agent Insights API', type: :request do
       it 'returns CSAT, labels and inboxes' do
         expect(body['csat']['ratings']).to include({ 'rating' => 5, 'count' => 1 }, { 'rating' => 3, 'count' => 1 })
         expect(body['csat']['satisfaction_rate']).to eq(50.0)
+        expect(body['csat']['reasons']).to eq([])
+        expect(body['csat']['without_reason_count']).to eq(2)
         expect(body['labels']).to contain_exactly({ 'label' => 'ativacao', 'count' => 1 }, { 'label' => 'suporte', 'count' => 1 })
         expect(body['inboxes']).to eq([{ 'id' => inbox.id, 'name' => 'WhatsApp', 'count' => 1 }])
       end
+    end
+  end
+
+  describe 'GET /api/v2/accounts/:account_id/agent_insights/:id/conversations' do
+    let(:url) { "/api/v2/accounts/#{account.id}/agent_insights/#{agent.id}/conversations" }
+
+    it 'returns unauthorized for agents' do
+      get url, params: params, headers: agent.create_new_auth_token, as: :json
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'returns the conversations the agent resolved with their CSAT, filtered by rating' do
+      get url, params: params.merge(rating: 3), headers: admin.create_new_auth_token, as: :json
+
+      expect(response).to have_http_status(:success)
+      body = response.parsed_body
+      expect(body['total_count']).to eq(1)
+      expect(body['records'].first).to include('inbox' => { 'id' => inbox.id, 'name' => 'WhatsApp' })
+      expect(body['records'].first['csat']).to include('rating' => 3, 'reason' => nil)
     end
   end
 end

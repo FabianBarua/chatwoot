@@ -6,6 +6,7 @@ import Rating from 'survey/components/Rating.vue';
 import Feedback from 'survey/components/Feedback.vue';
 import Banner from 'survey/components/Banner.vue';
 import StarRating from 'shared/components/StarRating.vue';
+import CsatReasons from 'shared/components/CsatReasons.vue';
 import { useMessageFormatter } from 'shared/composables/useMessageFormatter';
 import { getSurveyDetails, updateSurvey } from 'survey/api/survey';
 
@@ -20,6 +21,7 @@ export default {
     Banner,
     Feedback,
     StarRating,
+    CsatReasons,
   },
   setup() {
     const { formatMessage } = useMessageFormatter();
@@ -31,6 +33,10 @@ export default {
       isLoading: false,
       errorMessage: null,
       selectedRating: null,
+      selectedReason: null,
+      // Xplus: reasons offered after a low rating; null means "use the default list"
+      reasons: null,
+      reasonsMaxRating: 2,
       feedbackMessage: '',
       hasSubmittedFeedback: false,
       isUpdating: false,
@@ -70,6 +76,23 @@ export default {
     enableFeedbackForm() {
       return !this.isFeedbackSubmitted && this.isRatingSubmitted;
     },
+    reasonOptions() {
+      if (Array.isArray(this.reasons)) return this.reasons;
+      // Default list in the survey language, English when the language has none
+      const defaults = this.$tm('SURVEY.REASONS.DEFAULTS');
+      const list =
+        Array.isArray(defaults) && defaults.length
+          ? defaults
+          : this.$i18n.getLocaleMessage('en').SURVEY.REASONS.DEFAULTS;
+      return list.map(item => this.$rt(item));
+    },
+    shouldShowReasons() {
+      return (
+        this.isRatingSubmitted &&
+        this.selectedRating <= this.reasonsMaxRating &&
+        this.reasonOptions.length > 0
+      );
+    },
     shouldShowErrorMessage() {
       return !!this.errorMessage;
     },
@@ -93,6 +116,13 @@ export default {
     selectRating(rating) {
       if (this.isFeedbackSubmitted || this.isUpdating) return;
       this.selectedRating = rating;
+      // A reason only makes sense for the low rating it was picked for
+      if (rating > this.reasonsMaxRating) this.selectedReason = null;
+      this.updateSurveyDetails();
+    },
+    selectReason(reason) {
+      if (this.isFeedbackSubmitted || this.isUpdating) return;
+      this.selectedReason = reason === this.selectedReason ? null : reason;
       this.updateSurveyDetails();
     },
     sendFeedback(message) {
@@ -107,7 +137,10 @@ export default {
         this.inboxName = result.data.inbox_name;
         this.surveyDetails = result?.data?.csat_survey_response;
         this.selectedRating = this.surveyDetails?.rating;
+        this.selectedReason = this.surveyDetails?.reason || null;
         this.feedbackMessage = this.surveyDetails?.feedback_message || '';
+        this.reasons = result.data.reasons ?? null;
+        this.reasonsMaxRating = result.data.reasons_max_rating || 2;
         this.displayType = result.data.display_type || CSAT_DISPLAY_TYPES.EMOJI;
         this.messageContent =
           result.data.content ||
@@ -128,6 +161,7 @@ export default {
             submitted_values: {
               csat_survey_response: {
                 rating: this.selectedRating,
+                reason: this.selectedReason,
                 feedback_message: this.feedbackMessage,
               },
             },
@@ -139,6 +173,7 @@ export default {
         });
         this.surveyDetails = {
           rating: this.selectedRating,
+          reason: this.selectedReason,
           feedback_message: this.feedbackMessage,
         };
         if (markFeedbackSubmitted) {
@@ -205,6 +240,20 @@ export default {
           class="[&>button>span]:text-4xl !justify-start !px-0"
           @select-rating="selectRating"
         />
+        <div v-if="shouldShowReasons" class="mt-6">
+          <label class="text-base font-medium text-n-slate-12">
+            {{ $t('SURVEY.REASONS.LABEL') }}
+          </label>
+          <p class="mt-1 mb-4 text-sm text-n-slate-11">
+            {{ $t('SURVEY.REASONS.HINT') }}
+          </p>
+          <CsatReasons
+            :reasons="reasonOptions"
+            :selected-reason="selectedReason"
+            :is-disabled="isFeedbackSubmitted || isUpdating"
+            @select-reason="selectReason"
+          />
+        </div>
         <Feedback
           v-if="enableFeedbackForm"
           :is-updating="isUpdating"

@@ -5,6 +5,17 @@
       "LABEL": "Rate your conversation",
       "SUCCESS_MESSAGE": "Thank you for submitting the rating"
     },
+    "REASONS": {
+      "LABEL": "Sorry about that. Would you tell us what went wrong?",
+      "HINT": "Optional: pick the option that best describes it.",
+      "DEFAULTS": [
+        "Slow to respond",
+        "My problem was not solved",
+        "Unfriendly service",
+        "Confusing or wrong information",
+        "Other"
+      ]
+    },
     "FEEDBACK": {
       "LABEL": "Do you have any thoughts you'd like to share?",
       "PLACEHOLDER": "Your feedback (optional)",

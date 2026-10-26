@@ -48,6 +48,9 @@ class Inbox < ApplicationRecord
   include InboxBrandedEmailLayoutable
   include InboxBotStatus
 
+  # Xplus: a CSAT rating of this value or lower asks the customer for a reason
+  CSAT_REASONS_MAX_RATING = 2
+
   # Not allowing characters:
   validates :name, presence: true
   validates :account_id, presence: true

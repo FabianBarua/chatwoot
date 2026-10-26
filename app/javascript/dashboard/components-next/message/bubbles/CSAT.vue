@@ -63,6 +63,11 @@ const starRatingValue = computed(() => {
         </span>
       </dd>
 
+      <dt v-if="response.reason" class="text-n-slate-11 italic mt-2">
+        {{ t('CONVERSATION.REASON_TITLE') }}
+      </dt>
+      <dd v-if="response.reason">{{ response.reason }}</dd>
+
       <dt v-if="response.feedbackMessage" class="text-n-slate-11 italic mt-2">
         {{ t('CONVERSATION.FEEDBACK_TITLE') }}
       </dt>

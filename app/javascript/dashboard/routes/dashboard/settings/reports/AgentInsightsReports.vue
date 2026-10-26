@@ -133,6 +133,7 @@ onMounted(() => {
     v-if="selectedAgentId"
     :insight="insight"
     :is-loading="isLoading"
+    :range="range"
   />
   <AgentsOverview
     v-else

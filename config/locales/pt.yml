@@ -274,6 +274,7 @@ pt:
         agent_name: Nome do Representante
         handled_by: Atendido por
         rating: Avaliar
+        reason: Motivo
         feedback: Comentário de Feedback
         recorded_at: Data de gravação
         review_notes: Review Notes

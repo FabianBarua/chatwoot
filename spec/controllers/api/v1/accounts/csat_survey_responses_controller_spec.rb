@@ -208,7 +208,8 @@ RSpec.describe 'CSAT Survey Responses API', type: :request do
             headers: administrator.create_new_auth_token
 
         expect(response).to have_http_status(:success)
-        injected = CSV.parse(response.body).map { |row| row[2] }.find { |value| value.to_s.include?('1+1') }
+        # Xplus: the reason column sits between rating and feedback
+        injected = CSV.parse(response.body).map { |row| row[3] }.find { |value| value.to_s.include?('1+1') }
         expect(injected).to start_with("'")
       end
     end

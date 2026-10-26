@@ -60,10 +60,7 @@ class V2::Reports::AgentInsightsBuilder
 
   def current_state
     open_conversations = account.conversations.open.assigned_to(user)
-    {
-      open_conversations: open_conversations.count,
-      unattended_conversations: open_conversations.unattended.count
-    }
+    { open_conversations: open_conversations.count, unattended_conversations: open_conversations.unattended.count }
   end
 
   def summary_for(from, to)
@@ -188,7 +185,14 @@ class V2::Reports::AgentInsightsBuilder
     {
       ratings: (1..5).map { |rating| { rating: rating, count: ratings[rating] || 0 } },
       satisfaction_rate: total.positive? ? (satisfied * 100.0 / total).round(1) : nil
-    }
+    }.merge(csat_reasons)
+  end
+
+  # Xplus: why customers rated low, and how many rated without picking a reason
+  def csat_reasons
+    counts = csat_scope(range_start, range_end).group(:reason).count
+    { reasons: counts.except(nil).sort_by { |reason, count| [-count, reason] }.map { |reason, count| { reason: reason, count: count } },
+      without_reason_count: counts[nil] || 0 }
   end
 
   # Conversations where the agent replied in the period

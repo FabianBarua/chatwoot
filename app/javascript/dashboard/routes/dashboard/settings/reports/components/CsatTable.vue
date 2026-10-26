@@ -63,6 +63,7 @@ const tableData = computed(() => {
     assignedAgent: response.assigned_agent,
     assignedAgentBot: response.assigned_agent_bot,
     rating: response.rating,
+    reason: response.reason || '',
     feedbackText: response.feedback_message || '',
     conversationId: response.conversation_id,
     csatReviewNotes: response.csat_review_notes,
@@ -86,6 +87,10 @@ const columns = computed(() => {
     columnHelper.accessor('rating', {
       header: t('CSAT_REPORTS.TABLE.HEADER.RATING'),
       size: 120,
+    }),
+    columnHelper.accessor('reason', {
+      header: t('CSAT_REPORTS.TABLE.HEADER.REASON'),
+      size: 180,
     }),
     columnHelper.accessor('feedbackText', {
       header: t('CSAT_REPORTS.TABLE.HEADER.FEEDBACK_TEXT'),
@@ -194,6 +199,14 @@ const table = useVueTable({
                 </div>
               </td>
               <td class="py-4 px-5">
+                <span v-if="row.reason" class="text-sm text-n-slate-12">
+                  {{ row.reason }}
+                </span>
+                <span v-else class="text-n-slate-10 italic text-sm">
+                  {{ $t('CSAT_REPORTS.NO_REASON') }}
+                </span>
+              </td>
+              <td class="py-4 px-5">
                 <span
                   v-if="!row.feedbackText"
                   class="text-n-slate-10 italic text-sm"
@@ -244,7 +257,7 @@ const table = useVueTable({
               v-if="showExpandableRows && isRowExpanded(row.id)"
               class="!border-t-0"
             >
-              <td colspan="5" class="p-0 !border-t-0">
+              <td colspan="6" class="p-0 !border-t-0">
                 <CsatExpandedRow :response="row._original" />
               </td>
             </tr>

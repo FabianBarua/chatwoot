@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_16_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_26_000000) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -957,6 +957,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_16_000000) do
     t.datetime "review_notes_updated_at"
     t.bigint "review_notes_updated_by_id"
     t.bigint "assigned_agent_bot_id"
+    t.string "reason"
     t.index ["account_id"], name: "index_csat_survey_responses_on_account_id"
     t.index ["assigned_agent_bot_id"], name: "index_csat_survey_responses_on_assigned_agent_bot_id"
     t.index ["assigned_agent_id"], name: "index_csat_survey_responses_on_assigned_agent_id"

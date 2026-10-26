@@ -302,6 +302,7 @@ en:
         agent_name: Agent Name
         handled_by: Handled by
         rating: Rating
+        reason: Reason
         feedback: Feedback Comment
         recorded_at: Recorded date
         review_notes: Review Notes

@@ -274,6 +274,7 @@ es:
         agent_name: Nombre del agente
         handled_by: Atendido por
         rating: Calificación
+        reason: Motivo
         feedback: Comentario de opinión
         recorded_at: Fecha registrada
         review_notes: Review Notes

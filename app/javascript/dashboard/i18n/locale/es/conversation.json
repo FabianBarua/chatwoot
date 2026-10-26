@@ -85,6 +85,7 @@
     "RESPONSE": "Respuesta",
     "RATING_TITLE": "Calificación",
     "FEEDBACK_TITLE": "Comentarios",
+    "REASON_TITLE": "Motivo",
     "REPLY_MESSAGE_NOT_FOUND": "Mensaje no disponible",
     "CAPTAIN_GENERATION": {
       "TITLE": "¿Cómo se generó esta respuesta?",

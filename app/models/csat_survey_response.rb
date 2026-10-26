@@ -6,6 +6,7 @@
 #  csat_review_notes          :text
 #  feedback_message           :text
 #  rating                     :integer          not null
+#  reason                     :string
 #  review_notes_updated_at    :datetime
 #  created_at                 :datetime         not null
 #  updated_at                 :datetime         not null
@@ -49,4 +50,10 @@ class CsatSurveyResponse < ApplicationRecord
   scope :filter_by_team_id, ->(team_id) { joins(:conversation).where(conversations: { team_id: team_id }) if team_id.present? }
   # filter by rating value
   scope :filter_by_rating, ->(rating) { where(rating: rating) if rating.present? }
+  # Xplus: the reason the customer picked after a low rating ("none" = rated without a reason)
+  scope :filter_by_reason, lambda { |reason|
+    next if reason.blank?
+
+    reason.to_s == 'none' ? where(reason: nil) : where(reason: reason)
+  }
 end

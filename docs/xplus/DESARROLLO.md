@@ -12,6 +12,7 @@ Guía para trabajar sobre la edición Xplus de Chatwoot: desde editar el código
 - **Pestaña Bot:** la lista de conversaciones tiene una pestaña con las conversaciones que lleva un bot (estado `pending`), pensada para SuporteOficialX. Detalle en `docs/xplus/pestana-bot.md`.
 - **Asignación al conectarse:** cuando un agente se pone online (o vuelve a estar presente), se reparten las conversaciones que esperaban en sus bandejas. Detalle en `docs/xplus/asignacion-al-conectarse.md`.
 - **Reporte del bot y CSAT por bot:** Informes → Bot con la estructura del reporte de agentes, un evento `conversation_auto_resolved` que separa inactividad de resolución del bot, y el CSAT atribuido al agent bot. Detalle en `docs/xplus/relatorio-bot.md`.
+- **Motivos de calificación baja:** después de una nota baja la encuesta pide un motivo (lista por bandeja, con defaults), y el reporte del agente lista las conversaciones que cerró con calificación, motivo y filtros. Detalle en `docs/xplus/csat-motivos.md`.
 
 ## Requisitos en la PC
 

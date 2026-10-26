@@ -23,7 +23,7 @@ class Public::Api::V1::CsatSurveyController < PublicController
   end
 
   def message_update_params
-    params.permit(message: [{ submitted_values: [:name, :title, :value, { csat_survey_response: [:feedback_message, :rating] }] }])
+    params.permit(message: [{ submitted_values: [:name, :title, :value, { csat_survey_response: [:feedback_message, :rating, :reason] }] }])
   end
 
   def check_csat_locked

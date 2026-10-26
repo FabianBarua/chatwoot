@@ -54,6 +54,13 @@ class ReportsAPI extends ApiClient {
     });
   }
 
+  // Xplus: conversations the agent resolved in the period, with their CSAT rating and reason
+  getAgentConversations(id, { since, until, rating, reason, page }) {
+    return axios.get(`${this.baseUrl()}/agent_insights/${id}/conversations`, {
+      params: { since, until, rating, reason, page },
+    });
+  }
+
   getBotInsights({ since, until }) {
     return axios.get(`${this.baseUrl()}/bot_insights`, {
       params: { since, until, timezone_offset: getTimeOffset() },

@@ -157,6 +157,9 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
 
   def format_template_config(config, formatted)
     formatted['template'] = config['template'] if config['template'].present?
+    # Xplus: reasons offered after a low rating; without the key the survey keeps its default list
+    formatted['reasons_max_rating'] = (config['reasons_max_rating'] || Inbox::CSAT_REASONS_MAX_RATING).to_i.clamp(1, 5)
+    formatted['reasons'] = Array(config['reasons']).map { |reason| reason.to_s.strip }.compact_blank.uniq if config.key?('reasons')
   end
 
   def update_branded_email_layout
@@ -191,8 +194,8 @@ class Api::V1::Accounts::InboxesController < Api::V1::Accounts::BaseController
     [:name, :avatar, :greeting_enabled, :greeting_message, :enable_email_collect, :csat_survey_enabled,
      :enable_auto_assignment, :working_hours_enabled, :out_of_office_message, :timezone, :allow_messages_after_resolved,
      :lock_to_single_conversation, :portal_id, :sender_name_type, :business_name,
-     { csat_config: [:display_type, :message, :button_text, :language,
-                     { survey_rules: [:operator, { values: [] }],
+     { csat_config: [:display_type, :message, :button_text, :language, :reasons_max_rating,
+                     { reasons: [], survey_rules: [:operator, { values: [] }],
                        template: [:name, :template_id, :friendly_name, :content_sid, :approval_sid, :created_at, :language, :status] }] }]
   end
 

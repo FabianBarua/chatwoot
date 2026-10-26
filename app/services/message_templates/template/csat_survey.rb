@@ -34,7 +34,10 @@ class MessageTemplates::Template::CsatSurvey
 
   def content_attributes
     {
-      display_type: csat_config['display_type'] || 'emoji'
+      display_type: csat_config['display_type'] || 'emoji',
+      # Xplus: reasons offered after a low rating; nil means the widget uses its default list
+      reasons: csat_config['reasons'],
+      reasons_max_rating: csat_config['reasons_max_rating'] || Inbox::CSAT_REASONS_MAX_RATING
     }
   end
 end

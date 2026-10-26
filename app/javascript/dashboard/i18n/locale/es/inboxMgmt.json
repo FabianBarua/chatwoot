@@ -1302,6 +1302,22 @@
         },
         "SELECT_PLACEHOLDER": "select labels"
       },
+      "REASONS": {
+        "LABEL": "Motivos de calificación baja",
+        "DESCRIPTION": "Después de una calificación de {rating} o menor, se le pide al cliente que elija uno de estos motivos. Dejá la lista vacía para no preguntar.",
+        "MAX_RATING_LABEL": "Pedir motivo cuando la calificación sea",
+        "MAX_RATING_SUFFIX": "o menor",
+        "INPUT_PLACEHOLDER": "Nuevo motivo",
+        "ADD": "Agregar",
+        "EMPTY": "Sin motivos configurados: no se le preguntará al cliente.",
+        "DEFAULTS": [
+          "Demora en responder",
+          "No resolvieron mi problema",
+          "Atención poco amable",
+          "Información confusa o incorrecta",
+          "Otro"
+        ]
+      },
       "NOTE": "Note: CSAT surveys are sent only once per conversation",
       "WHATSAPP_NOTE": "Note: When you save, the system creates a dedicated CSAT template in WhatsApp (used to capture rating and feedback in reports) and submits it as Utility for approval. Meta may still classify it as Marketing based on content. After approval, surveys are sent only once per conversation as per the survey rule.",
       "API": {
